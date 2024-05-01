@@ -1,0 +1,1 @@
+enum UserRole { primary_admin, secondary_admin, student }
