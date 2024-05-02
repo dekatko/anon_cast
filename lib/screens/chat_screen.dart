@@ -33,8 +33,8 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _loadChatSession() async {
-    _currentSession = await HiveService
-        .getChatSession(); // Or ChatSessionController.getChatSession()
+    // _currentSession = await HiveService
+    //     .getChatSession(); // Or ChatSessionController.getChatSession()
   }
 
   void _sendMessage() async {
@@ -45,7 +45,7 @@ class _ChatScreenState extends State<ChatScreen> {
       // Call sendMessage on the instance
       // await chatService.sendMessage(widget.chatRoomId, messageContent);
       _messageController.clear();
-      _getMessages(); // Refresh message list after sending
+      // _getMessages(); // Refresh message list after sending
     }
   }
 
