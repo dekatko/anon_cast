@@ -1,4 +1,4 @@
-package com.your_app
+package com.example.anon_cast
 
 import android.os.Bundle
 import io.flutter.app.FlutterActivity
@@ -19,10 +19,9 @@ class MainActivity : FlutterActivity() {
         channel.setMethodCallHandler { call, result ->
             if (call.method == "generateSecureBytes") {
                 val count = call.argument<Int>("count") ?: return@setMethodCallHandler
-                val randomBytes = SecureRandom().generateSeed(count)
+                val randomBytes = ByteArray(count)
+                SecureRandom().nextBytes(randomBytes)
                 result.success(randomBytes.toList())
-            } else {
-                result.notImplemented()
             }
         }
     }

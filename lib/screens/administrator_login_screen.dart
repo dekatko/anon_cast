@@ -14,7 +14,7 @@ class _AdministratorLoginScreenState extends State<AdministratorLoginScreen> {
   String _password = '';
   bool _isLoading = false; // Flag for login progress
 
-  final _userBox = Hive.box<User>('users');
+  // final _userBox = Hive.box<User>('users');
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +71,7 @@ class _AdministratorLoginScreenState extends State<AdministratorLoginScreen> {
     );
 
     // Add the user to the Hive box
-    await _userBox.add(newUser);
+    // await _userBox.add(newUser);
 
     // Show success message or perform other actions (optional)
     print('User registered successfully!');

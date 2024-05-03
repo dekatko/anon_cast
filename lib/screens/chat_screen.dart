@@ -59,6 +59,7 @@ class _ChatScreenState extends State<ChatScreen> {
       final box = await Hive.openBox('chat_session');
       final sessionData = box.get('session');
       if (sessionData != null) {
+        log.i("");
         return ChatSession.fromMap(sessionData); // Assuming a fromMap constructor
       } else {
         // No session found, create a new one

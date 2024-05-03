@@ -1,4 +1,7 @@
 import 'package:anon_cast/models/chat_message.dart';
+import 'package:logger/logger.dart';
+
+final log = Logger();
 
 class ChatSession {
   final String username; // Username of the anonymous user (optional)
@@ -7,7 +10,8 @@ class ChatSession {
 
   ChatSession({required this.username, required this.startedAt, required this.messages});
 
-  factory ChatSession.fromMap(Map<String, dynamic> map) {
+  factory ChatSession.fromMap(Map<dynamic, dynamic> map) {
+    log.i("");
     return ChatSession(
       username: map['username'] as String,
       startedAt: DateTime.fromMillisecondsSinceEpoch(map['startedAt'] as int),
