@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
-class AdminLoginScreen extends StatefulWidget {
+import '../models/user.dart';
+import '../models/user_role.dart';
+
+class AdministratorLoginScreen extends StatefulWidget {
   @override
-  _AdminLoginScreenState createState() => _AdminLoginScreenState();
+  _AdministratorLoginScreenState createState() => _AdministratorLoginScreenState();
 }
 
-class _AdminLoginScreenState extends State<AdminLoginScreen> {
+class _AdministratorLoginScreenState extends State<AdministratorLoginScreen> {
   String _username = '';
   String _password = '';
   bool _isLoading = false; // Flag for login progress
+
+  final _userBox = Hive.box<User>('users');
 
   @override
   Widget build(BuildContext context) {
@@ -48,5 +54,26 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _registerUser() async {
+    // Form validation (optional)
+    if (_username.isEmpty || _password.isEmpty) {
+      // Show a dialog or display an error message
+      return;
+    }
+
+    // Create a new User object using your existing User class
+    final newUser = User(
+      id: UniqueKey().toString(), // Assuming you need an ID
+      name: _username, // Assuming username maps to User.name
+      role: UserRole.primary_admin, // Or appropriate role for admin
+    );
+
+    // Add the user to the Hive box
+    await _userBox.add(newUser);
+
+    // Show success message or perform other actions (optional)
+    print('User registered successfully!');
   }
 }

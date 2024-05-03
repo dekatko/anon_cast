@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:hive/hive.dart';
+
 import '../models/chat_message.dart';
 import '../utils/encryption_util.dart';
 
@@ -22,9 +24,16 @@ class ChatService {
     );
 
     // Store the message in the database (implementation omitted)
-    await storeMessage(message);
+    // await storeMessage(message);
 
     return message;
+  }
+
+  Future<void> saveMessage(ChatMessage message) async {
+    final box = await Hive.openBox('chat_messages');
+    // Generate a unique ID for the message (optional)
+    // message.id = "${DateTime.now().millisecondsSinceEpoch}-${message.hashCode}";
+    await box.add(message);
   }
 
   // Future<ChatMessage> getMessage(String messageId) async {

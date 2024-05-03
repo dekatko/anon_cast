@@ -31,28 +31,28 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
     // _generateEphemeralKeyPair();
     // Fetch messages for the chat room using chat_service.dart
-    _loadSessionFuture = _loadChatSession(); // Preload the future
+    _loadSessionFuture = _loadOrCreateChatSession(); // Preload the future
   }
 
   Future<void> _generateEphemeralKeyPair() async {
     _myEphemeralKeyPair = await _keyService.generateEphemeralKeyPair();
   }
 
-  Future<ChatSession?> _loadChatSession() async {
-    try {
-      final box = await Hive.openBox('chat_session');
-      final sessionData = box.get('session');
-      if (sessionData != null) {
-        return ChatSession.fromMap(sessionData); // Assuming a fromMap constructor
-      } else {
-        return null;
-      }
-    } catch (error) {
-      // Handle potential errors during session retrieval (optional)
-      print('Error loading chat session: $error');
-      return null;
-    }
-  }
+  // Future<ChatSession?> _loadChatSession() async {
+  //   try {
+  //     final box = await Hive.openBox('chat_session');
+  //     final sessionData = box.get('session');
+  //     if (sessionData != null) {
+  //       return ChatSession.fromMap(sessionData); // Assuming a fromMap constructor
+  //     } else {
+  //       return null;
+  //     }
+  //   } catch (error) {
+  //     // Handle potential errors during session retrieval (optional)
+  //     print('Error loading chat session: $error');
+  //     return null;
+  //   }
+  // }
 
   Future<ChatSession?> _loadOrCreateChatSession() async {
     try {
@@ -90,8 +90,8 @@ class _ChatScreenState extends State<ChatScreen> {
       // Generate ephemeral key pair if not already generated. Null-Aware assignment used
       _myEphemeralKeyPair ??= await _keyService.generateEphemeralKeyPair();
       // Call sendMessage on the chat service instance
-      await _chatService.sendMessage(
-          messageContent, _myEphemeralKeyPair!.publicKey); // Assuming arguments
+      // await _chatService.sendMessage(
+      //     messageContent, _myEphemeralKeyPair!.publicKey); // Assuming arguments
       _messageController.clear();
       // Refresh message list after sending (consider using a provider/bloc for updates)
       _loadSessionFuture = _loadOrCreateChatSession(); // Reload session data
@@ -106,7 +106,7 @@ class _ChatScreenState extends State<ChatScreen> {
         title: const Text("Chat Room"),
       ),
       body: FutureBuilder<ChatSession?>(
-        future: _loadChatSession(), // Replace with your actual method call
+        future: _loadOrCreateChatSession(), // Replace with your actual method call
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final session = snapshot.data!;

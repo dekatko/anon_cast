@@ -15,5 +15,11 @@ class ChatSession {
     );
   }
 
-
+  Map<String, dynamic> toMap() {
+    return {
+      'username': username,
+      'startedAt': startedAt.millisecondsSinceEpoch, // Convert DateTime to milliseconds
+      'messages': messages.map((message) => message.toMap()).toList(), // Convert messages to maps
+    };
+  }
 }

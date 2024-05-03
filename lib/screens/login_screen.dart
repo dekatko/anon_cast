@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import '../models/user_role.dart';
 import '../services/authentication_service.dart';
+import 'administrator_login_screen.dart';
 import 'chat_screen.dart';
 
 final log = Logger();
@@ -74,6 +75,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 onPressed: () {
                   log.i('Administrator Login button pressed');
                   // Navigate to administrator login screen
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AdministratorLoginScreen()),
+                  );
                 },
                 style: TextButton.styleFrom(
                   foregroundColor: Colors.teal, // Teal text color
