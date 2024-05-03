@@ -2,8 +2,18 @@ import 'package:anon_cast/models/chat_message.dart';
 
 class ChatSession {
   final String username; // Username of the anonymous user (optional)
-  final List<ChatMessage> messages; // List of messages in the current chat sesh
   final DateTime startedAt; // Timestamp of the chat session start
+  final List<ChatMessage> messages; // List of messages in the current chat sesh
 
-  ChatSession(this.username, this.messages, this.startedAt);
+  ChatSession({required this.username, required this.startedAt, required this.messages});
+
+  factory ChatSession.fromMap(Map<String, dynamic> map) {
+    return ChatSession(
+      username: map['username'] as String,
+      startedAt: DateTime.fromMillisecondsSinceEpoch(map['startedAt'] as int),
+      messages: (map['messages'] as List<dynamic>).map((messageData) => ChatMessage.fromMap(messageData)).toList(),
+    );
+  }
+
+
 }

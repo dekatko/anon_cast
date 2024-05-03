@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import '../models/chat_message.dart';
 import '../utils/encryption_util.dart';
 
 class ChatService {
@@ -8,23 +9,23 @@ class ChatService {
 
   ChatService(this.key);
 
-  // Future<ChatMessage> sendMessage(String content, String recipientId) async {
-  //   final encryptedContent = await _encryptMessage(content);
-  //   final message = ChatMessage(
-  //     id: '...',
-  //     // Generate a unique ID for the message
-  //     senderId: '...',
-  //     // Sender ID (current user)
-  //     encryptedContent: encryptedContent,
-  //     timestamp: DateTime.now().toString(),
-  //     iv: _usedIv, // Store the used IV in the message
-  //   );
-  //
-  //   // Store the message in the database (implementation omitted)
-  //   await storeMessage(message);
-  //
-  //   return message;
-  // }
+  Future<ChatMessage> sendMessage(String content, String recipientId) async {
+    final encryptedContent = await _encryptMessage(content);
+    final message = ChatMessage(
+      id: '...',
+      // Generate a unique ID for the message
+      senderId: '...',
+      // Sender ID (current user)
+      encryptedContent: encryptedContent,
+      timestamp: DateTime.now().toString(),
+      iv: _usedIv, // Store the used IV in the message
+    );
+
+    // Store the message in the database (implementation omitted)
+    await storeMessage(message);
+
+    return message;
+  }
 
   // Future<ChatMessage> getMessage(String messageId) async {
   //   final message = await retrieveMessage(

@@ -1,16 +1,24 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:pointycastle/export.dart';
+import 'package:anon_cast/platform_channels/secure_random_channel.dart';
 
 class EncryptionKeyService {
   final _storage = const FlutterSecureStorage();
-  SecureRandom _random = SecureRandom(); // For generating random ephemeral keys
 
-  Future<AsymmetricKeyPair<PublicKey, PrivateKey>>
-      generateEphemeralKeyPair() async {
-    //
+  Future<AsymmetricKeyPair<PublicKey, PrivateKey>> generateEphemeralKeyPair() async {
+    var bytes = await SecureRandomChannel.generateSecureBytes(32);
+    final Uint8List byteList = Uint8List.fromList(bytes);
+    final digest = Digest('SHA-256'); // Create a SHA-256 digest
+    digest.update(byteList, 0, bytes.length); // Update the digest with the random bytes
+    final encodedBytes = digest.process(Uint8List(0));
+    SecureRandom random = SecureRandom(String.fromCharCodes(encodedBytes));
+
     var keyParams = ECKeyGeneratorParameters(ECCurve_secp256r1());
     var generator = ECKeyGenerator();
-    generator.init(ParametersWithRandom(keyParams, _random));
+    generator.init(ParametersWithRandom(keyParams, random));
 
     return generator.generateKeyPair();
   }

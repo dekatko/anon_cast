@@ -52,4 +52,14 @@ class ChatMessage extends HiveObject {
         'timestamp': timestamp,
         'iv': iv?.toList(), // Convert optional iv to a list if it exists
       };
+
+  factory ChatMessage.fromMap(Map<String, dynamic> map) {
+    return ChatMessage(
+      id: map['id'] as String,
+      senderId: map['senderId'] as String,
+      encryptedContent: map['encryptedContent'] as String,
+      timestamp: map['timestamp'] as String,
+      iv: map['iv']?.cast<int>(), // Handle optional iv
+    );
+  }
 }

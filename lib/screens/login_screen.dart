@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-
+import 'package:logger/logger.dart';
 import '../models/user_role.dart';
 import '../services/authentication_service.dart';
 import 'chat_screen.dart';
 
+final log = Logger();
+
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -27,33 +29,62 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.lightBlueAccent, // Light blue background
       appBar: AppBar(
-        title: const Text('Anonymous Login'),
+        title: const Text('Anon-Cast'), // Header text
+        centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            // Optional username/ID field
-            const TextField(
-              decoration: InputDecoration(
-                labelText: 'Username/ID (Optional)',
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Optional username/ID field with a more playful font
+              const TextField(
+                decoration: InputDecoration(
+                  labelText: 'Username/ID (Optional)',
+                  labelStyle: TextStyle(color: Colors.teal), // Playful teal color
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: Colors.tealAccent, width: 2.0), // Teal accent border when focused
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 20.0),
-            ElevatedButton(
-              onPressed: () => _loginAnonymousUser(),
-              // Direct call to the method
-              child: const Text('Login'),
-            ),
-            const SizedBox(height: 20.0),
-            TextButton(
-              onPressed: () {
-                // Navigate to administrator login screen
-              },
-              child: const Text('Administrator Login'),
-            ),
-          ],
+              const SizedBox(height: 20.0),
+              ElevatedButton(
+                onPressed: () {
+                  log.i('Anonymous Login button pressed');
+                  _loginAnonymousUser();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.tealAccent, // Light pink pastel
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0), // Rounded corners
+                  ),
+                  minimumSize: const Size(double.infinity, 50.0), // Wider button
+                ),
+                child: const Text(
+                  'Anonymous Login',
+                  style: TextStyle(color: Colors.black), // Black text for better contrast
+                ),
+              ),
+              const SizedBox(height: 20.0),
+              TextButton(
+                onPressed: () {
+                  log.i('Administrator Login button pressed');
+                  // Navigate to administrator login screen
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.teal, // Teal text color
+                ),
+                child: const Text(
+                  'Administrator Login',
+                  style: TextStyle(fontWeight: FontWeight.bold), // Bold text for emphasis
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -61,9 +92,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _loginAnonymousUser() async {
     final user = await AuthenticationService().signInAnonymously();
+    var uid = user?.uid;
+    log.i("_loginAnonymousUser() - ");
     // Handle successful student login
     if (user != null) {
       // Successful login, navigate to ChatScreen
+      log.i("Pushing to ChatScreen...");
       Navigator.push(
           context, MaterialPageRoute(builder: (context) => ChatScreen()));
     } else {
