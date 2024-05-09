@@ -1,8 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:logger/logger.dart';
 
-import '../models/user.dart';
+import '../models/administrator.dart';
 import '../models/user_role.dart';
 
 final log = Logger();
@@ -15,7 +16,7 @@ class AdministratorRegisterScreen extends StatefulWidget {
 }
 
 class _AdministratorRegisterScreenState extends State<AdministratorRegisterScreen> {
-  String _username = '';
+  String _email = '';
   String _password = '';
   String _confirmPassword = '';
   bool _isLoading = false; // Flag for registration progress
@@ -32,9 +33,9 @@ class _AdministratorRegisterScreenState extends State<AdministratorRegisterScree
           children: [
             TextField(
               decoration: const InputDecoration(
-                labelText: 'Username',
+                labelText: 'Email',
               ),
-              onChanged: (value) => setState(() => _username = value),
+              onChanged: (value) => setState(() => _email = value),
             ),
             const SizedBox(height: 10.0),
             TextField(
@@ -56,7 +57,7 @@ class _AdministratorRegisterScreenState extends State<AdministratorRegisterScree
             _isLoading
                 ? const CircularProgressIndicator()
                 : ElevatedButton(
-              onPressed: () => _registerUser(),
+              onPressed: () => registerAdministrator(),
               child: const Text('Register'),
             ),
           ],
@@ -65,39 +66,67 @@ class _AdministratorRegisterScreenState extends State<AdministratorRegisterScree
     );
   }
 
-  Future<void> _registerUser() async {
-    // Form validation (optional)
-    if (_username.isEmpty || _password.isEmpty || _confirmPassword.isEmpty) {
-      // Show a dialog or display an error message
-      return;
-    }
+  // Future<void> _registerUser() async {
+  //   // Form validation (optional)
+  //   if (_username.isEmpty || _password.isEmpty || _confirmPassword.isEmpty) {
+  //     // Show a dialog or display an error message
+  //     return;
+  //   }
+  //
+  //   if (_password != _confirmPassword) {
+  //     // Show an error message about password mismatch
+  //     return;
+  //   }
+  //
+  //   // Create a new User object assuming your User class has these properties
+  //   final newUser = User(
+  //     id: UniqueKey().toString(), // Assuming you need an ID
+  //     name: _username, // Assuming username maps to User.name
+  //     role: UserRole.primary_admin,
+  //     password: _password, // Or appropriate role for admin
+  //   );
+  //
+  //   // Open Hive box for User data (assuming a box named "users")
+  //   final userBox = await Hive.openBox<User>('users');
+  //
+  //   try {
+  //     // Add the user to the Hive box
+  //     await userBox.add(newUser);
+  //
+  //     // Show success message or perform other actions (optional)
+  //     log.i('Administrator registered successfully!');
+  //     Navigator.pop(context); // Navigate back to AdministratorLoginScreen
+  //   } catch (error) {
+  //     // Handle potential errors during Hive operation
+  //     log.e('Error registering user: $error');
+  //     // Show an error message to the user (optional)
+  //   }
+  // }
 
-    if (_password != _confirmPassword) {
-      // Show an error message about password mismatch
-      return;
-    }
-
-    // Create a new User object assuming your User class has these properties
-    final newUser = User(
-      id: UniqueKey().toString(), // Assuming you need an ID
-      name: _username, // Assuming username maps to User.name
-      role: UserRole.primary_admin, // Or appropriate role for admin
-    );
-
-    // Open Hive box for User data (assuming a box named "users")
-    final userBox = await Hive.openBox<User>('users');
-
+  Future<void> registerAdministrator() async {
+    final auth = FirebaseAuth.instance;
     try {
-      // Add the user to the Hive box
-      await userBox.add(newUser);
+      final userCredential = await auth.createUserWithEmailAndPassword(
+        email: _email,
+        password: _password,
+      );
 
-      // Show success message or perform other actions (optional)
-      log.i('Administrator registered successfully!');
-      Navigator.pop(context); // Navigate back to AdministratorLoginScreen
-    } catch (error) {
-      // Handle potential errors during Hive operation
-      log.e('Error registering user: $error');
-      // Show an error message to the user (optional)
+      // Generate a unique ID for the administrator
+      final administratorId = userCredential.user!.uid;
+
+      // Create and potentially save the administrator object (optional)
+      final administrator = Administrator(
+        id: administratorId,
+        email: _email,
+        password: _password, // Consider hashing password before storing
+      );
+
+      // ... (Optional) Save administrator data using Hive or other storage
+
+      log.i("Administrator registration successful!");
+    } on FirebaseAuthException catch (e) {
+      log.e("Administrator registration failed: ${e.message}");
+      // Handle registration errors (e.g., show error message)
     }
   }
 }

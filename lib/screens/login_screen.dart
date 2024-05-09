@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:logger/logger.dart';
+import '../models/user.dart';
 import '../models/user_role.dart';
 import '../services/authentication_service.dart';
 import 'administrator_login_screen.dart';
@@ -99,8 +101,25 @@ class _LoginScreenState extends State<LoginScreen> {
     final user = await AuthenticationService().signInAnonymously();
     var uid = user?.uid;
     log.i("_loginAnonymousUser() - ");
-    // Handle successful student login
+
+    // Handle successful login
     if (user != null) {
+      // Open the user box if not already opened
+      final userBox = Hive.box<User>('users');
+
+      // Check if a user with this uid already exists (optional)
+      final existingUser = userBox.get(uid);
+      if (existingUser == null) {
+        // Create and save a new anonymous user if it doesn't exist
+        final anonymousUser = User(
+          id: uid!, // Use the uid from Firebase
+          name: 'Anonymous',
+          role: UserRole.student,
+          password: '', // Empty password for anonymous user
+        );
+        userBox.put(uid, anonymousUser);
+      }
+
       // Successful login, navigate to ChatScreen
       log.i("Pushing to ChatScreen...");
       Navigator.push(

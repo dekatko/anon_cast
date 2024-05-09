@@ -6,6 +6,7 @@ import 'package:hive_flutter/adapters.dart';
 import 'firebase_options.dart';
 import 'models/chat_message.dart';
 import 'models/user.dart';
+import 'models/user_role.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,6 +18,9 @@ void main() async {
   // Registering the adapter
   Hive.registerAdapter(ChatMessageAdapter());
   Hive.registerAdapter(UserAdapter());
+  Hive.registerAdapter(UserRoleAdapter());
+
+  await Hive.openBox<User>('users');
 
   // Initialize Firebase
   await Firebase.initializeApp(

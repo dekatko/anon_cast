@@ -20,6 +20,7 @@ class UserAdapter extends TypeAdapter<User> {
       id: fields[0] as String,
       name: fields[1] as String,
       role: fields[2] as UserRole,
+      password: '',
     );
   }
 
