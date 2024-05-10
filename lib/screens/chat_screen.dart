@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:hive/hive.dart';
 import 'package:pointycastle/api.dart';
+import 'package:uuid/uuid.dart';
 
 import '../models/chat_message.dart';
 import '../models/chat_session.dart';
@@ -66,9 +67,13 @@ class _ChatScreenState extends State<ChatScreen> {
         final currentUser = FirebaseAuth.instance.currentUser;
         if (currentUser != null) {
           final newSession = ChatSession(
-              username: currentUser.uid, // Use anonymous user's UID as username
+              id: const Uuid().v4(),
+              studentId: currentUser.uid, // Use anonymous user's UID as username
+              adminId: '',
+              name: '',
               messages: [],
-              startedAt: DateTime.now()); // Set startedAt to current time
+              startedAt: DateTime.now(),
+              lastActive: DateTime.now()); // Set startedAt to current time
           await box.put('session', newSession.toMap()); // Save the new session
           return newSession;
         } else {

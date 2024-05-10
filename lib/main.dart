@@ -21,6 +21,7 @@ void main() async {
   Hive.registerAdapter(UserRoleAdapter());
 
   await Hive.openBox<User>('users');
+  await Hive.openBox<User>('chats');
 
   // Initialize Firebase
   await Firebase.initializeApp(

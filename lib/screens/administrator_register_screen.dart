@@ -120,6 +120,9 @@ class _AdministratorRegisterScreenState extends State<AdministratorRegisterScree
         email: _email,
         password: _password, // Consider hashing password before storing
       );
+      //TODO: Is Chat Room created upon registry of Administrator? Or is it manually created by the Administrator?
+      //TODO: Maybe Admin can create different rooms for different purposes. Room for Bullying, Room for questions, etc.
+      //TODO: Upon creation each room has its own unique registry code, through which students can log right into the chat room?
 
       // ... (Optional) Save administrator data using Hive or other storage
 
