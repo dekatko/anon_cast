@@ -1,16 +1,25 @@
 import 'package:anon_cast/models/chat_message.dart';
+import 'package:hive/hive.dart';
 import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
 
 final log = Logger();
 
+@HiveType(typeId: 4)
 class ChatSession {
+  @HiveField(0)
   final String id;
+  @HiveField(1)
   final String name;
+  @HiveField(2)
   final String studentId; // Username of the anonymous user (optional)
+  @HiveField(3)
   final String adminId;
+  @HiveField(4)
   final DateTime startedAt; // Timestamp of the chat session start
+  @HiveField(5)
   final DateTime lastActive;
+  @HiveField(6)
   final List<ChatMessage> messages; // List of messages in the current chat sesh
 
   ChatSession({

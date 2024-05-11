@@ -51,7 +51,7 @@ class _AdministratorLoginScreenState extends State<AdministratorLoginScreen> {
             const SizedBox(height: 20.0),
             Text(
               _errorMessage, // Display login error message (if any)
-              style: TextStyle(color: Colors.red, fontSize: 12.0),
+              style: const TextStyle(color: Colors.red, fontSize: 12.0),
             ),
             Row(
               // Place Login and Register buttons side-by-side
@@ -118,27 +118,6 @@ class _AdministratorLoginScreenState extends State<AdministratorLoginScreen> {
       // Handle login errors (e.g., show error message)
       _errorMessage = e.message!;
       return null;
-    }
-  }
-
-  String getErrorMessage(String currentMessage) {
-    // Map Firebase Auth exception codes to more user-friendly messages
-    final errorMap = {
-      'wrong-password': 'Incorrect email or password.',
-      'user-not-found': 'The email you entered does not exist.',
-      'invalid-email': 'Please enter a valid email address.',
-      'user-disabled': 'This account has been disabled.',
-      // Add more error codes and messages as needed
-    };
-
-    final errorCode = currentMessage.split(':').first.trim(); // Extract error code
-
-    // Check if the error code exists in the map
-    if (errorMap.containsKey(errorCode)) {
-      return errorMap[errorCode]!;
-    } else {
-      // Default message for unknown errors
-      return 'Login failed. Please try again.';
     }
   }
 }

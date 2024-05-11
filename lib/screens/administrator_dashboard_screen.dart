@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 import '../models/chat_session.dart';
-import '../models/user.dart';
+import '../screens/administrator_chat_dashboard_screen.dart'; // Import Chat Dashboard Screen
+import '../screens/administrator_system_settings_screen.dart'; // Import Settings Screen (replace with actual class name)
 
 class AdministratorDashboardScreen extends StatefulWidget {
   const AdministratorDashboardScreen({super.key});
@@ -11,96 +12,38 @@ class AdministratorDashboardScreen extends StatefulWidget {
   _AdministratorDashboardScreenState createState() => _AdministratorDashboardScreenState();
 }
 
-class _AdministratorDashboardScreenState extends State<AdministratorDashboardScreen>
-    with TickerProviderStateMixin {
-
+class _AdministratorDashboardScreenState extends State<AdministratorDashboardScreen> {
   final _chatBox = Hive.box<ChatSession>('chats'); // Replace 'chats' with your actual box name
-  bool _isMenuOpen = false; // Flag for menu open/closed state
-  late final AnimationController _menuController;
-
-  @override
-  void initState() {
-    super.initState();
-    _menuController = AnimationController(
-      vsync: this, // Use the TickerProvider from the StatefulWidget
-      duration: const Duration(milliseconds: 200),
-    );
-  }
-
-  @override
-  void dispose() {
-    _menuController.dispose();
-    super.dispose();
-  }
+  int _currentIndex = 0; // Index for current navigation bar item
 
   @override
   Widget build(BuildContext context) {
+    final screens = [
+      const AdministratorChatDashboardScreen(), // Add your chat dashboard screen
+      const AdministratorSystemSettingsScreen(), // Add your system settings screen
+      // Add more screens as needed
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Administrator Dashboard'),
-        // Add a leading menu button if desired (optional)
       ),
-      body: Stack(
-        children: [
-          // Main content area
-          buildContent(),
-          // Slide-in menu for system settings
-          SlideTransition(
-            position: Tween<Offset>(
-              // duration: const Duration(milliseconds: 200),
-              begin: const Offset(-1.0, 0.0), // Menu starts off-screen
-              end: const Offset(0.0, 0.0), // Menu slides in
-            ).animate(CurvedAnimation(parent: _menuController, curve: Curves.easeIn)),
-            child: Material(
-              color: Colors.blueGrey.shade700, // Menu background color
-              child: const Padding(
-                padding: EdgeInsets.all(20.0),
-                child: Column(
-                  children: [
-                    Text('System Settings', style: TextStyle(color: Colors.white, fontSize: 18.0)),
-                    Divider(color: Colors.white),
-                    // Add system settings options here (e.g., DropdownButtons, TextFields)
-                    // ...
-                  ],
-                ),
-              ),
-            ),
+      body: screens[_currentIndex], // Display current navigation bar screen
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed, // Fixed icons at the bottom
+        currentIndex: _currentIndex, // Set current index
+        onTap: (index) => setState(() => _currentIndex = index), // Update index on tap
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.chat),
+            label: 'Chats',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
+          ),
+          // Add more items for additional screens
         ],
-      ),
-    );
-  }
-
-  Widget buildContent() {
-    return GestureDetector(
-      // Detect left swipe to open menu
-      onHorizontalDragEnd: (details) => {
-        if (details.primaryVelocity! > 0.0) // Left swipe
-          setState(() => _isMenuOpen = true),
-      },
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            const Text('Active Chats'),
-            const SizedBox(height: 10.0),
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 2, // Adjust grid layout as needed
-                children: List.generate(_chatBox.length, (index) {
-                  final chat = _chatBox.getAt(index)!;
-                  // Customize chat square UI based on your chat model
-                  return Container(
-                    color: Colors.grey[200],
-                    child: Center(
-                      child: Text(chat.name), // Replace with appropriate chat information
-                    ),
-                  );
-                }),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

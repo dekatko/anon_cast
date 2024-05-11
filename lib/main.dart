@@ -1,3 +1,4 @@
+import 'package:anon_cast/models/chat_session.dart';
 import 'package:anon_cast/screens/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +22,7 @@ void main() async {
   Hive.registerAdapter(UserRoleAdapter());
 
   await Hive.openBox<User>('users');
-  await Hive.openBox<User>('chats');
+  await Hive.openBox<ChatSession>('chats');
 
   // Initialize Firebase
   await Firebase.initializeApp(

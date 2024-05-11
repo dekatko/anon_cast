@@ -19,6 +19,8 @@ class _AdministratorRegisterScreenState extends State<AdministratorRegisterScree
   String _email = '';
   String _password = '';
   String _confirmPassword = '';
+  String _errorMessage = ''; // String to store login error message
+
   bool _isLoading = false; // Flag for registration progress
 
   @override
@@ -52,6 +54,11 @@ class _AdministratorRegisterScreenState extends State<AdministratorRegisterScree
               ),
               obscureText: true,
               onChanged: (value) => setState(() => _confirmPassword = value),
+            ),
+            const SizedBox(height: 10.0),
+            Text(
+              _errorMessage, // Display error message below text fields
+              style: TextStyle(color: Colors.red, fontSize: 14.0),
             ),
             const SizedBox(height: 20.0),
             _isLoading
@@ -104,6 +111,11 @@ class _AdministratorRegisterScreenState extends State<AdministratorRegisterScree
   // }
 
   Future<void> registerAdministrator() async {
+    setState(() {
+      _isLoading = true; // Set loading state to true
+      _errorMessage = ''; // Clear any previous error message
+    });
+
     final auth = FirebaseAuth.instance;
     try {
       final userCredential = await auth.createUserWithEmailAndPassword(
@@ -127,7 +139,13 @@ class _AdministratorRegisterScreenState extends State<AdministratorRegisterScree
       // ... (Optional) Save administrator data using Hive or other storage
 
       log.i("Administrator registration successful!");
+      // Navigate back to AdministratorLoginScreen after successful registration
+      Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
+      setState(() {
+        _isLoading = false; // Set loading state to false
+        _errorMessage = e.message!; // Update error message
+      });
       log.e("Administrator registration failed: ${e.message}");
       // Handle registration errors (e.g., show error message)
     }
