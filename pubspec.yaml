@@ -50,6 +50,8 @@ dependencies:
   crypto: ^3.0.3
   collection: ^1.18.0
   uuid: ^4.4.0
+  cloud_firestore: ^4.17.3
+  provider: ^6.1.2
 
 dev_dependencies:
   flutter_test:

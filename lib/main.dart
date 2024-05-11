@@ -1,8 +1,10 @@
 import 'package:anon_cast/models/chat_session.dart';
+import 'package:anon_cast/provider/firestore_provider.dart';
 import 'package:anon_cast/screens/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:provider/provider.dart';
 
 import 'firebase_options.dart';
 import 'models/chat_message.dart';
@@ -24,15 +26,23 @@ void main() async {
   await Hive.openBox<User>('users');
   await Hive.openBox<ChatSession>('chats');
 
+  WidgetsFlutterBinding.ensureInitialized();
+  final firestoreProvider = FirestoreProvider();
+  await firestoreProvider.initialize();
+
   // Initialize Firebase
   await Firebase.initializeApp(
     // Replace with actual values
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  // final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // AuthResult result = await _auth.signInAnonymously();
-  runApp(const MyApp());
+  runApp(
+    // Wrap your app with Provider
+    Provider<FirestoreProvider>.value(
+      value: firestoreProvider,
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
