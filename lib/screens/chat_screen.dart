@@ -8,7 +8,9 @@ import 'package:uuid/uuid.dart';
 
 import '../models/chat_message.dart';
 import '../models/chat_session.dart';
+import '../provider/chat_session_provider.dart';
 import '../provider/firestore_provider.dart';
+import '../provider/user_provider.dart';
 import '../services/chat_service.dart';
 import '../services/encryption_key_service.dart';
 
@@ -35,7 +37,7 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
     // _generateEphemeralKeyPair();
     // Fetch messages for the chat room using chat_service.dart
-    _loadSessionFuture = _loadOrCreateChatSession(); // Preload the future
+    // _loadSessionFuture = _loadOrCreateChatSession(); // Preload the future
   }
 
   Future<void> _generateEphemeralKeyPair() async {
@@ -43,25 +45,32 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<ChatSession?> _loadOrCreateChatSession() async {
+    final user = Provider.of<UserProvider>(context).user;
+    final chatSessionProvider = Provider.of<ChatSessionProvider>(context, listen: false);
+
     try {
-      final box = await Hive.openBox('chat_session');
-      final sessionData = box.get('session');
+      final box = await Hive.openBox('chat_sessions');
+      final sessionData = box.get(chatSessionProvider.chatSession?.id);
+
       if (sessionData != null) {
         log.i("");
-        return ChatSession.fromMap(sessionData); // Assuming a fromMap constructor
+        return ChatSession.fromMap(sessionData as Map); // Assuming a fromMap constructor
       } else {
         // No session found, create a new one
-        final currentUser = FirebaseAuth.instance.currentUser;
-        if (currentUser != null) {
+        // final currentUser = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          log.i("_loadOrCreateChatSession() - Creating new ChatSession");
           final newSession = ChatSession(
               id: const Uuid().v4(),
-              studentId: currentUser.uid, // Use anonymous user's UID as username
+              studentId: user.id, // Use anonymous user's UID as username
               adminId: '',
               name: '',
               messages: [],
               startedAt: DateTime.now(),
               lastActive: DateTime.now()); // Set startedAt to current time
-          await box.put('session', newSession.toMap()); // Save the new session
+          await box.put(newSession.id, newSession.toMap()); // Save the new session
+          chatSessionProvider.setChatSession(newSession);
+
           return newSession;
         } else {
           // Handle case where user is not logged in (optional)
@@ -115,9 +124,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Chat Room"),
+        title: const Text('Chat Room'),
       ),
       body: FutureBuilder<ChatSession?>(
         future: _loadOrCreateChatSession(), // Replace with your actual method call

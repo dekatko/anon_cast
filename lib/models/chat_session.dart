@@ -45,7 +45,6 @@ class ChatSession {
     );
   }
 
-
   factory ChatSession.fromMap(Map<dynamic, dynamic> map) {
     log.i("");
     return ChatSession(

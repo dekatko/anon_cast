@@ -1,4 +1,5 @@
 import 'package:anon_cast/models/chat_session.dart';
+import 'package:anon_cast/provider/chat_session_provider.dart';
 import 'package:anon_cast/provider/firestore_provider.dart';
 import 'package:anon_cast/screens/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -10,6 +11,7 @@ import 'firebase_options.dart';
 import 'models/chat_message.dart';
 import 'models/user.dart';
 import 'models/user_role.dart';
+import 'provider/user_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,22 +26,33 @@ void main() async {
 
   // Initialize hive
   await Hive.initFlutter();
+  // await Hive.deleteFromDisk();
   // Registering the adapter
   Hive.registerAdapter(ChatMessageAdapter());
   Hive.registerAdapter(UserAdapter());
   Hive.registerAdapter(UserRoleAdapter());
 
   await Hive.openBox<User>('users');
-  await Hive.openBox<ChatSession>('chats');
+  // await Hive.openBox<ChatSession>('chat_sessions');
 
   WidgetsFlutterBinding.ensureInitialized();
+
+  //Providers
   final firestoreProvider = FirestoreProvider();
   await firestoreProvider.initialize();
+  final userProvider = UserProvider();
+  final chatSessionProvider = ChatSessionProvider();
 
   runApp(
-    // Wrap your app with Provider
-    ChangeNotifierProvider<FirestoreProvider>.value(
-      value: firestoreProvider,
+    // Wrap your app with MultiProvider
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<FirestoreProvider>.value(
+          value: firestoreProvider,
+        ),
+        ChangeNotifierProvider<UserProvider>(create: (_) => userProvider),
+        ChangeNotifierProvider<ChatSessionProvider>(create: (_) => chatSessionProvider),// Add UserProvider
+      ],
       child: const MyApp(),
     ),
   );

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:logger/logger.dart';
+import 'package:provider/provider.dart';
 import '../models/user.dart';
 import '../models/user_role.dart';
+import '../provider/user_provider.dart';
 import '../services/authentication_service.dart';
 import 'administrator_login_screen.dart';
 import 'chat_screen.dart';
@@ -99,6 +101,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _loginAnonymousUser() async {
     final user = await AuthenticationService().signInAnonymously();
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
     var uid = user?.uid;
     log.i("_loginAnonymousUser() - ");
 
@@ -118,6 +122,9 @@ class _LoginScreenState extends State<LoginScreen> {
           password: '', // Empty password for anonymous user
         );
         userBox.put(uid, anonymousUser);
+        userProvider.setUser(anonymousUser);
+      } else {
+        userProvider.setUser(existingUser);
       }
 
       // Successful login, navigate to ChatScreen
