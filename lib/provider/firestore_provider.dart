@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
-class FirestoreProvider extends ChangeNotifier {
+class FirestoreProvider with ChangeNotifier{
   late FirebaseFirestore _firestore;
 
   FirebaseFirestore get firestore => _firestore;

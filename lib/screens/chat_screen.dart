@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:hive/hive.dart';
 import 'package:pointycastle/api.dart';
+import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/chat_message.dart';
 import '../models/chat_session.dart';
+import '../provider/firestore_provider.dart';
 import '../services/chat_service.dart';
 import '../services/encryption_key_service.dart';
 
@@ -23,6 +25,7 @@ class _ChatScreenState extends State<ChatScreen> {
   AsymmetricKeyPair<PublicKey, PrivateKey>? _myEphemeralKeyPair;
   final ChatService _chatService = ChatService("placeholder"); // Assuming ChatService instance
   final EncryptionKeyService _keyService = EncryptionKeyService();
+  final firestore = FirestoreProvider();
 
   final TextEditingController _messageController =
       TextEditingController(); // For user input
@@ -38,22 +41,6 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _generateEphemeralKeyPair() async {
     _myEphemeralKeyPair = await _keyService.generateEphemeralKeyPair();
   }
-
-  // Future<ChatSession?> _loadChatSession() async {
-  //   try {
-  //     final box = await Hive.openBox('chat_session');
-  //     final sessionData = box.get('session');
-  //     if (sessionData != null) {
-  //       return ChatSession.fromMap(sessionData); // Assuming a fromMap constructor
-  //     } else {
-  //       return null;
-  //     }
-  //   } catch (error) {
-  //     // Handle potential errors during session retrieval (optional)
-  //     print('Error loading chat session: $error');
-  //     return null;
-  //   }
-  // }
 
   Future<ChatSession?> _loadOrCreateChatSession() async {
     try {
@@ -95,9 +82,30 @@ class _ChatScreenState extends State<ChatScreen> {
     if (messageContent.isNotEmpty) {
       // Generate ephemeral key pair if not already generated. Null-Aware assignment used
       _myEphemeralKeyPair ??= await _keyService.generateEphemeralKeyPair();
-      // Call sendMessage on the chat service instance
-      // await _chatService.sendMessage(
-      //     messageContent, _myEphemeralKeyPair!.publicKey); // Assuming arguments
+      // Option 1: Store message content directly in Firestore (less secure)
+      await firestore.firestore
+          .collection('chatRooms') // Replace with appropriate collection name
+          .doc('roomId') // Replace with actual chat room ID
+          .collection('messages')
+          .add({
+        'content': messageContent,
+        'senderId': FirebaseAuth.instance.currentUser?.uid, // Use anonymous user ID
+        'timestamp': DateTime.now(), // Add timestamp for sorting
+      });
+
+      // Option 2: Store message reference (more secure)
+      // final encryptedMessage = await _chatService._encryptMessage(
+      //     messageContent, _myEphemeralKeyPair!.publicKey); // Assuming encryption logic
+      await firestore.firestore
+          .collection('chatRooms') // Replace with appropriate collection name
+          .doc('roomId') // Replace with actual chat room ID
+          .collection('messages')
+          .add({
+        'content': messageContent, // Encrypted message content
+        'senderId': FirebaseAuth.instance.currentUser?.uid, // Use anonymous user ID
+        'timestamp': DateTime.now(), // Add timestamp for sorting
+      });
+
       _messageController.clear();
       // Refresh message list after sending (consider using a provider/bloc for updates)
       _loadSessionFuture = _loadOrCreateChatSession(); // Reload session data

@@ -16,6 +16,12 @@ void main() async {
   // final dir = await getApplicationDocumentsDirectory();
   // Hive.defaultDirectory = dir.path;
 
+  // Initialize Firebase
+  await Firebase.initializeApp(
+    // Replace with actual values
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   // Initialize hive
   await Hive.initFlutter();
   // Registering the adapter
@@ -30,17 +36,11 @@ void main() async {
   final firestoreProvider = FirestoreProvider();
   await firestoreProvider.initialize();
 
-  // Initialize Firebase
-  await Firebase.initializeApp(
-    // Replace with actual values
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
   runApp(
     // Wrap your app with Provider
-    Provider<FirestoreProvider>.value(
+    ChangeNotifierProvider<FirestoreProvider>.value(
       value: firestoreProvider,
-      child: MyApp(),
+      child: const MyApp(),
     ),
   );
 }
