@@ -1,4 +1,4 @@
-import '../services/HiveService.dart';
+import '../services/hive_service.dart';
 
 class ChatSessionController {
   final _hiveService = HiveService(); // Instance of the HiveService

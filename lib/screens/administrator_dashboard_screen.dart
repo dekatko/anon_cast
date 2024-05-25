@@ -13,7 +13,7 @@ class AdministratorDashboardScreen extends StatefulWidget {
 }
 
 class _AdministratorDashboardScreenState extends State<AdministratorDashboardScreen> {
-  final _chatBox = Hive.box<ChatSession>('chats'); // Replace 'chats' with your actual box name
+  final _chatBox = Hive.box<ChatSession>('chat_sessions'); // Replace 'chats' with your actual box name
   int _currentIndex = 0; // Index for current navigation bar item
 
   @override

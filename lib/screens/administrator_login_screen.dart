@@ -1,11 +1,9 @@
-import 'package:collection/collection.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import 'package:logger/logger.dart';
+import 'package:provider/provider.dart';
 
-import '../models/user.dart';
-import '../models/user_role.dart';
+import '../provider/firestore_provider.dart';
 import 'administrator_dashboard_screen.dart';
 import 'administrator_register_screen.dart';
 
@@ -83,15 +81,24 @@ class _AdministratorLoginScreenState extends State<AdministratorLoginScreen> {
                   child: const Text('Login'),
                 ),
                 ElevatedButton(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const AdministratorRegisterScreen()),
-                  ),
+                  onPressed: () => pushToAdminRegister(),
                   child: const Text('Register'),
                 ),
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void pushToAdminRegister() async {
+    final firestoreProvider = context.read<FirestoreProvider>(); // Access provider
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AdministratorRegisterScreen(
+          firestoreProvider: firestoreProvider, // Provide the instance
         ),
       ),
     );

@@ -12,7 +12,7 @@ class AdministratorChatDashboardScreen extends StatefulWidget {
 }
 
 class _AdministratorChatDashboardScreenState extends State<AdministratorChatDashboardScreen> {
-  final _chatBox = Hive.box<ChatSession>('chats'); // Replace 'chats' with your actual box name
+  final _chatBox = Hive.box<ChatSession>('chat_sessions'); // Replace 'chats' with your actual box name
 
   @override
   Widget build(BuildContext context) {

@@ -26,14 +26,14 @@ void main() async {
 
   // Initialize hive
   await Hive.initFlutter();
-  // await Hive.deleteFromDisk();
+  //await Hive.deleteFromDisk();
   // Registering the adapter
   Hive.registerAdapter(ChatMessageAdapter());
   Hive.registerAdapter(UserAdapter());
   Hive.registerAdapter(UserRoleAdapter());
 
   await Hive.openBox<User>('users');
-  // await Hive.openBox<ChatSession>('chat_sessions');
+  await Hive.openBox<ChatSession>('chat_sessions');
 
   WidgetsFlutterBinding.ensureInitialized();
 
