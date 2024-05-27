@@ -3,12 +3,14 @@ class Administrator {
   final String adminCode;
   final String email;
   final String? name; // Optional field for administrator name
+  final DateTime created;
 
   Administrator({
     required this.uid,
     required this.adminCode,
     required this.email,
     this.name,
+    required this.created,
   });
 
   Map<String, dynamic> toMap() {
@@ -17,6 +19,7 @@ class Administrator {
       'email': email,
       'adminCode': adminCode,
       'name': name,
+      'created': created.toIso8601String(),
     };
   }
 
@@ -26,6 +29,7 @@ class Administrator {
       email: map['email'] as String,
       adminCode: map['adminCode'] as String,
       name: map['name'] as String?,
+      created: DateTime.parse(map['created'] as String),
     );
   }
 }

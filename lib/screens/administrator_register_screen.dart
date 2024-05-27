@@ -110,7 +110,8 @@ class _AdministratorRegisterScreenState extends State<AdministratorRegisterScree
             uid: userCredential.user!.uid,
             adminCode: generateAdminCode(),
             email: _email,
-            name: _name
+            name: _name,
+          created: DateTime.now(),
         );
 
         await widget.firestoreProvider.saveAdministrator(admin);
