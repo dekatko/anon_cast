@@ -2,6 +2,7 @@ import 'package:anon_cast/models/chat_session.dart';
 import 'package:anon_cast/provider/chat_session_provider.dart';
 import 'package:anon_cast/provider/firestore_provider.dart';
 import 'package:anon_cast/screens/login_screen.dart';
+import 'package:anon_cast/services/chat_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
@@ -42,6 +43,7 @@ void main() async {
   await firestoreProvider.initialize();
   final userProvider = UserProvider();
   final chatSessionProvider = ChatSessionProvider();
+  final chatService = ChatService('');
 
   runApp(
     // Wrap your app with MultiProvider
@@ -51,7 +53,8 @@ void main() async {
           value: firestoreProvider,
         ),
         ChangeNotifierProvider<UserProvider>(create: (_) => userProvider),
-        ChangeNotifierProvider<ChatSessionProvider>(create: (_) => chatSessionProvider),// Add UserProvider
+        ChangeNotifierProvider<ChatSessionProvider>(create: (_) => chatSessionProvider),
+        Provider<ChatService>(create: (_) => chatService),
       ],
       child: const MyApp(),
     ),

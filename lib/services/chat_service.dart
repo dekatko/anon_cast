@@ -1,13 +1,17 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive/hive.dart';
 
 import '../models/chat_message.dart';
+import '../models/chat_session.dart';
 import '../utils/encryption_util.dart';
 
 class ChatService {
   final String key; // Encryption key (assumed to be securely stored)
+  final CollectionReference _chat_sessions = FirebaseFirestore.instance.collection('chat_sessions');
+  final CollectionReference _admins = FirebaseFirestore.instance.collection('administrators');
 
   ChatService(this.key);
 
@@ -60,6 +64,48 @@ class ChatService {
     }
     return EncryptionUtil.decrypt(
         encryptedContent, base64Decode(key), key, iv.toList());
+  }
+
+  Future<ChatSession?> checkForExistingChat(String anonymousUserId, String adminCode) async {
+    // Query Firestore for chats where anonymousUserId is a participant
+    // and the adminCode matches the administrator's code
+    final snapshot = await _chat_sessions.where('participants', arrayContains: anonymousUserId)
+        .where('adminCode', isEqualTo: adminCode)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      // Existing chat found, return the first chat data
+      final chatData = snapshot.docs.first.data();
+      return ChatSession.fromMap(chatData as Map<dynamic, dynamic>); // Convert data to Chat object
+    } else {
+      return null; // No existing chat found
+    }
+  }
+
+  Future<ChatSession> createChat(String anonymousUserId, String adminCode) async {
+    // 1. Verify adminCode and retrieve AdminId
+    final adminData = await _findAdminByCode(adminCode);
+    if (adminData == null) {
+      throw Exception('Invalid admin code'); // Handle invalid code error
+    }
+    final adminId = adminData.id;
+
+    // 2. Create a new chat document with participants and adminId
+    final chatId = _chat_sessions.doc().id;
+    final newChat = ChatSession.create(anonymousUserId, adminId);
+
+    // 3. Save chat data and participant references
+    await _chat_sessions.doc(chatId).set(newChat.toMap());
+    await _chat_sessions.doc(chatId).update({
+      'participants': FieldValue.arrayUnion([anonymousUserId, adminId]),
+    });
+
+    return newChat; // Return the created ChatSession object
+  }
+
+  Future<DocumentSnapshot?> _findAdminByCode(String adminCode) async {
+    final snapshot = await _admins.where('adminCode', isEqualTo: adminCode).get();
+    return snapshot.docs.isNotEmpty ? snapshot.docs.first : null;
   }
 
   Uint8List?

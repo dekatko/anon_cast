@@ -6,6 +6,7 @@ import '../models/user.dart';
 import '../models/user_role.dart';
 import '../provider/user_provider.dart';
 import '../services/authentication_service.dart';
+import '../services/chat_service.dart';
 import 'administrator_login_screen.dart';
 import 'chat_screen.dart';
 
@@ -20,14 +21,15 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _adminCodeController = TextEditingController();
   bool _isLoading = false; // Flag for login progress indicator
+  String _errorMessage = '';
   UserRole selectedRole = UserRole.student;
 
   @override
   void dispose() {
     _usernameController.dispose();
-    _passwordController.dispose();
+    _adminCodeController.dispose();
     super.dispose();
   }
 
@@ -36,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: Colors.lightBlueAccent, // Light blue background
       appBar: AppBar(
-        title: const Text('Anon-Cast'), // Header text
+        title: const Text('Elly'), // Header text
         centerTitle: true,
       ),
       body: Center(
@@ -46,14 +48,10 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Optional username/ID field with a more playful font
-              const TextField(
-                decoration: InputDecoration(
-                  labelText: 'Username/ID (Optional)',
-                  labelStyle: TextStyle(color: Colors.teal), // Playful teal color
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.tealAccent, width: 2.0), // Teal accent border when focused
-                  ),
+              TextField(
+                controller: _adminCodeController,
+                decoration: const InputDecoration(
+                  labelText: 'Admin Code',
                 ),
               ),
               const SizedBox(height: 20.0),
@@ -65,23 +63,31 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.tealAccent, // Light pink pastel
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20.0), // Rounded corners
+                    borderRadius: BorderRadius.circular(
+                        20.0), // Rounded corners
                   ),
-                  minimumSize: const Size(double.infinity, 50.0), // Wider button
+                  minimumSize: const Size(
+                      double.infinity, 50.0), // Wider button
                 ),
                 child: const Text(
                   'Anonymous Login',
-                  style: TextStyle(color: Colors.black), // Black text for better contrast
+                  style: TextStyle(
+                      color: Colors.black), // Black text for better contrast
                 ),
               ),
               const SizedBox(height: 20.0),
+              Text(
+                _errorMessage, // Display login error message (if any)
+                style: const TextStyle(color: Colors.red, fontSize: 12.0),
+              ),
               TextButton(
                 onPressed: () {
                   log.i('Administrator Login button pressed');
                   // Navigate to administrator login screen
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => AdministratorLoginScreen()),
+                    MaterialPageRoute(
+                        builder: (context) => const AdministratorLoginScreen()),
                   );
                 },
                 style: TextButton.styleFrom(
@@ -89,7 +95,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 child: const Text(
                   'Administrator Login',
-                  style: TextStyle(fontWeight: FontWeight.bold), // Bold text for emphasis
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold), // Bold text for emphasis
                 ),
               ),
             ],
@@ -101,38 +108,62 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _loginAnonymousUser() async {
     final user = await AuthenticationService().signInAnonymously();
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final chatService = Provider.of<ChatService>(context, listen: false);
 
     var uid = user?.uid;
-    log.i("_loginAnonymousUser() - ");
+    var adminCode = _adminCodeController.text;
+    log.i("_loginAnonymousUser() - - uid: $uid, adminCode: $adminCode");
 
-    // Handle successful login
-    if (user != null) {
-      // Open the user box if not already opened
-      final userBox = Hive.box<User>('users');
+    // Combined check for user and adminCode
+    if (uid != null && adminCode.isNotEmpty) {
 
-      // Check if a user with this uid already exists (optional)
-      final existingUser = userBox.get(uid);
-      if (existingUser == null) {
-        // Create and save a new anonymous user if it doesn't exist
-        final anonymousUser = User(
-          id: uid!, // Use the uid from Firebase
-          name: 'Anonymous',
-          role: UserRole.student,
-          password: '', // Empty password for anonymous user
+      getOrCreateUser(context, uid);
+      // Check for existing chat session (if user and adminCode are present)
+      final existingChat = await chatService.checkForExistingChat(
+          uid!, adminCode);
+      if (existingChat != null) {
+        log.i("Existing chat found, joining...");
+        // Join the existing chat session
+        // ... (your logic for joining based on existingChat data)
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => ChatScreen(chatSession: existingChat)),
         );
-        userBox.put(uid, anonymousUser);
-        userProvider.setUser(anonymousUser);
+        return; // Exit the function if existing chat is joined
       } else {
-        userProvider.setUser(existingUser);
+        log.i("No existing chat found, creating new chat...");
+        // Create a new chat session
+        // ... (your logic for creating a new chat session using uid and adminCode)
+        final newChat = await chatService.createChat(uid!, adminCode);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => ChatScreen(chatSession: newChat)),
+        );
       }
+    }
+  }
 
-      // Successful login, navigate to ChatScreen
-      log.i("Pushing to ChatScreen...");
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => ChatScreen()));
+  User getOrCreateUser(BuildContext context, String uid) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    final userBox = Hive.box<User>('users');
+
+    final existingUser = userBox.get(uid);
+    if (existingUser == null) {
+      final anonymousUser = User(
+        id: uid!,
+        name: 'Anonymous',
+        role: UserRole.student,
+        password: '', // Empty password for anonymous user
+      );
+      userBox.put(uid, anonymousUser);
+      userProvider.setUser(anonymousUser);
+      return anonymousUser;
     } else {
-      // Handle login failure (optional: show an error message)
+      userProvider.setUser(existingUser);
+      return existingUser;
     }
   }
 }

@@ -10,21 +10,18 @@ class ChatSession {
   @HiveField(0)
   final String id;
   @HiveField(1)
-  final String name;
-  @HiveField(2)
   final String studentId; // Username of the anonymous user (optional)
-  @HiveField(3)
+  @HiveField(2)
   final String adminId;
-  @HiveField(4)
+  @HiveField(3)
   final DateTime startedAt; // Timestamp of the chat session start
-  @HiveField(5)
+  @HiveField(4)
   final DateTime lastActive;
-  @HiveField(6)
+  @HiveField(5)
   final List<ChatMessage> messages; // List of messages in the current chat sesh
 
   ChatSession({
     required this.id,
-    required this.name,
     required this.studentId,
     required this.adminId,
     required this.startedAt,
@@ -32,13 +29,12 @@ class ChatSession {
     required this.messages,
   });
 
-  factory ChatSession.create() {
+  factory ChatSession.create(String studentId, String adminId) {
     const uuid = Uuid();
     return ChatSession(
       id: uuid.v4(),
-      name: '',
-      studentId: '',
-      adminId: '',
+      studentId: studentId,
+      adminId: adminId,
       startedAt: DateTime.now(),
       messages: [],
       lastActive: DateTime.now(),
@@ -49,7 +45,6 @@ class ChatSession {
     log.i("");
     return ChatSession(
       id: map['id'] as String,
-      name: map['name'] as String,
       studentId: map['questionerId'] as String,
       adminId: map['adminId'] as String,
       startedAt: DateTime.fromMillisecondsSinceEpoch(map['startedAt'] as int),

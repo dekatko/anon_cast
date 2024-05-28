@@ -17,6 +17,10 @@ import '../services/encryption_key_service.dart';
 final log = Logger();
 
 class ChatScreen extends StatefulWidget {
+  final ChatSession chatSession;
+
+  const ChatScreen({super.key, required this.chatSession});
+
   @override
   State<ChatScreen> createState() => _ChatScreenState();
 }
@@ -37,7 +41,6 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
     // _generateEphemeralKeyPair();
     // Fetch messages for the chat room using chat_service.dart
-    // _loadSessionFuture = _loadOrCreateChatSession(); // Preload the future
   }
 
   Future<void> _generateEphemeralKeyPair() async {
@@ -64,7 +67,6 @@ class _ChatScreenState extends State<ChatScreen> {
               id: const Uuid().v4(),
               studentId: user.id, // Use anonymous user's UID as username
               adminId: '',
-              name: '',
               messages: [],
               startedAt: DateTime.now(),
               lastActive: DateTime.now()); // Set startedAt to current time

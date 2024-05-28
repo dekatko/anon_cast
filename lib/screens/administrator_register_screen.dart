@@ -139,10 +139,9 @@ class _AdministratorRegisterScreenState extends State<AdministratorRegisterScree
 
   String generateAdminCode() {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    final random = Random();
     String code = '';
     for (int i = 0; i < 6; i++) {
-      code += characters[random.nextInt(characters.length)];
+      code += characters[Random().nextInt(characters.length)];
     }
     return code.toUpperCase();
   }
