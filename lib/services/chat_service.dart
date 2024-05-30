@@ -69,16 +69,16 @@ class ChatService {
   Future<ChatSession?> checkForExistingChat(String anonymousUserId, String adminCode) async {
     // Query Firestore for chats where anonymousUserId is a participant
     // and the adminCode matches the administrator's code
-    final snapshot = await _chat_sessions.where('participants', arrayContains: anonymousUserId)
-        .where('adminCode', isEqualTo: adminCode)
-        .get();
+    final snapshotChatSessions = await _chat_sessions.where('participants', arrayContains: anonymousUserId).get();
 
-    if (snapshot.docs.isNotEmpty) {
+    final snapshotAdmin = _findAdminByCode(adminCode);
+
+    if (snapshotChatSessions.docs.isNotEmpty && snapshotAdmin != null) {
       // Existing chat found, return the first chat data
-      final chatData = snapshot.docs.first.data();
+      final chatData = snapshotChatSessions.docs.first.data();
       return ChatSession.fromMap(chatData as Map<dynamic, dynamic>); // Convert data to Chat object
     } else {
-      return null; // No existing chat found
+      return null; // No existing chat found between user and admin
     }
   }
 
