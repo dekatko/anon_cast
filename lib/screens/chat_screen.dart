@@ -26,6 +26,7 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  Box? _chatSessionBox;
   Future<ChatSession?>? _loadSessionFuture;
   List<ChatMessage> messages = []; // List to store chat messages
   AsymmetricKeyPair<PublicKey, PrivateKey>? _myEphemeralKeyPair;
@@ -38,7 +39,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void initState() {
+    log.i("initState ChatScreen");
     super.initState();
+    _chatSessionBox = Hive.box<ChatSession>('chat_sessions');
     // _generateEphemeralKeyPair();
     // Fetch messages for the chat room using chat_service.dart
   }
@@ -52,12 +55,12 @@ class _ChatScreenState extends State<ChatScreen> {
     final chatSessionProvider = Provider.of<ChatSessionProvider>(context, listen: false);
 
     try {
-      final box = await Hive.openBox('chat_sessions');
-      final sessionData = box.get(chatSessionProvider.chatSession?.id);
+      final sessionData = _chatSessionBox?.get(chatSessionProvider.chatSession?.id);
 
       if (sessionData != null) {
-        log.i("");
-        return ChatSession.fromMap(sessionData as Map); // Assuming a fromMap constructor
+        log.i("_loadOrCreateChatSession() - Loading existing ChatSession");
+        return ChatSession.fromMap(
+            sessionData as Map); // Assuming a fromMap constructor
       } else {
         // No session found, create a new one
         // final currentUser = FirebaseAuth.instance.currentUser;
@@ -67,10 +70,12 @@ class _ChatScreenState extends State<ChatScreen> {
               id: const Uuid().v4(),
               studentId: user.id, // Use anonymous user's UID as username
               adminId: '',
-              messages: [],
               startedAt: DateTime.now(),
-              lastActive: DateTime.now()); // Set startedAt to current time
-          await box.put(newSession.id, newSession.toMap()); // Save the new session
+              lastActive: DateTime.now(),
+              messages: []); // Set startedAt to current time
+
+          await _chatSessionBox?.put(
+              newSession.id, newSession); // Save the new session
           chatSessionProvider.setChatSession(newSession);
 
           return newSession;

@@ -3,6 +3,8 @@ import 'package:hive/hive.dart';
 import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
 
+part 'chat_session.g.dart';
+
 final log = Logger();
 
 @HiveType(typeId: 4)

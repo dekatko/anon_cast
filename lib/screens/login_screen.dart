@@ -112,12 +112,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
     var uid = user?.uid;
     var adminCode = _adminCodeController.text;
-    log.i("_loginAnonymousUser() - - uid: $uid, adminCode: $adminCode");
+    log.i("_loginAnonymousUser() - uid: $uid, adminCode: $adminCode");
 
     // Combined check for user and adminCode
     if (uid != null && adminCode.isNotEmpty) {
 
-      getOrCreateUser(context, uid);
+      _setOrCreateHiveUserInProvider(context, uid);
       // Check for existing chat session (if user and adminCode are present)
       final existingChat = await chatService.checkForExistingChat(
           uid!, adminCode);
@@ -145,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  User getOrCreateUser(BuildContext context, String uid) {
+  void _setOrCreateHiveUserInProvider(BuildContext context, String uid) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     final userBox = Hive.box<User>('users');
@@ -160,10 +160,10 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       userBox.put(uid, anonymousUser);
       userProvider.setUser(anonymousUser);
-      return anonymousUser;
+      log.i("getOrCreateUser() - Created new User and set in Provider");
     } else {
       userProvider.setUser(existingUser);
-      return existingUser;
+      log.i("getOrCreateUser() - Set Existing User in Provider");
     }
   }
 }

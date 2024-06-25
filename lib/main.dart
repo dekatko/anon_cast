@@ -32,6 +32,7 @@ void main() async {
   Hive.registerAdapter(ChatMessageAdapter());
   Hive.registerAdapter(UserAdapter());
   Hive.registerAdapter(UserRoleAdapter());
+  Hive.registerAdapter(ChatSessionAdapter());
 
   await Hive.openBox<User>('users');
   await Hive.openBox<ChatSession>('chat_sessions');
