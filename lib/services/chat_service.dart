@@ -71,7 +71,11 @@ class ChatService {
     // and the adminCode matches the administrator's code
     final snapshotChatSessions = await _chat_sessions.where('participants', arrayContains: anonymousUserId).get();
 
-    final snapshotAdmin = _findAdminByCode(adminCode);
+    final snapshotAdmin = findAdminByCode(adminCode);
+
+    if (snapshotAdmin == null) {
+      throw Exception('Invalid admin code'); // Handle invalid code error
+    }
 
     if (snapshotChatSessions.docs.isNotEmpty && snapshotAdmin != null) {
       // Existing chat found, return the first chat data
@@ -84,7 +88,7 @@ class ChatService {
 
   Future<ChatSession> createChat(String anonymousUserId, String adminCode) async {
     // 1. Verify adminCode and retrieve AdminId
-    final adminData = await _findAdminByCode(adminCode);
+    final adminData = await findAdminByCode(adminCode);
     if (adminData == null) {
       throw Exception('Invalid admin code'); // Handle invalid code error
     }
@@ -103,7 +107,7 @@ class ChatService {
     return newChat; // Return the created ChatSession object
   }
 
-  Future<DocumentSnapshot?> _findAdminByCode(String adminCode) async {
+  Future<DocumentSnapshot?> findAdminByCode(String adminCode) async {
     final snapshot = await _admins.where('adminCode', isEqualTo: adminCode).get();
     return snapshot.docs.isNotEmpty ? snapshot.docs.first : null;
   }

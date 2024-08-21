@@ -116,31 +116,39 @@ class _LoginScreenState extends State<LoginScreen> {
 
     // Combined check for user and adminCode
     if (uid != null && adminCode.isNotEmpty) {
+      final snapshotAdmin = await chatService.findAdminByCode(adminCode);
 
-      _setOrCreateHiveUserInProvider(context, uid);
-      // Check for existing chat session (if user and adminCode are present)
-      final existingChat = await chatService.checkForExistingChat(
-          uid!, adminCode);
-      if (existingChat != null) {
-        log.i("Existing chat found, joining...");
-        // Join the existing chat session
-        // ... (your logic for joining based on existingChat data)
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => ChatScreen(chatSession: existingChat)),
-        );
-        return; // Exit the function if existing chat is joined
+      if (snapshotAdmin != null && snapshotAdmin.exists) {
+        // Admin is associated with the admin code
+        _setOrCreateHiveUserInProvider(context, uid);
+        final existingChat = await chatService.checkForExistingChat(
+            uid!, adminCode);
+
+        if (existingChat != null) {
+          log.i("Existing chat found, joining...");
+          // Join the existing chat session
+          // ... (your logic for joining based on existingChat data)
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ChatScreen(chatSession: existingChat)),
+          );
+          return; // Exit the function if existing chat is joined
+        } else {
+          log.i("No existing chat found, creating new chat...");
+          // Create a new chat session
+          // ... (your logic for creating a new chat session using uid and adminCode)
+          final newChat = await chatService.createChat(uid!, adminCode);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ChatScreen(chatSession: newChat)),
+          );
+        }
       } else {
-        log.i("No existing chat found, creating new chat...");
-        // Create a new chat session
-        // ... (your logic for creating a new chat session using uid and adminCode)
-        final newChat = await chatService.createChat(uid!, adminCode);
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => ChatScreen(chatSession: newChat)),
-        );
+        setState(() {
+          _errorMessage = 'Invalid admin code';
+        });
       }
     }
   }

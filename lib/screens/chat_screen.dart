@@ -53,9 +53,11 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<ChatSession?> _loadOrCreateChatSession() async {
     final user = Provider.of<UserProvider>(context).user;
     final chatSessionProvider = Provider.of<ChatSessionProvider>(context, listen: false);
+    final chatSession = await chatSessionProvider.chatSession;
 
     try {
-      final sessionData = _chatSessionBox?.get(chatSessionProvider.chatSession?.id);
+      final chatSessionId = chatSession?.id;
+      final sessionData = _chatSessionBox?.get(chatSession?.id);
 
       if (sessionData != null) {
         log.i("_loadOrCreateChatSession() - Loading existing ChatSession");
