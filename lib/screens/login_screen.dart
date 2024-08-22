@@ -7,7 +7,7 @@ import '../models/user_role.dart';
 import '../provider/user_provider.dart';
 import '../services/authentication_service.dart';
 import '../services/chat_service.dart';
-import 'administrator_login_screen.dart';
+import 'admin_login_screen.dart';
 import 'chat_screen.dart';
 
 final log = Logger();
