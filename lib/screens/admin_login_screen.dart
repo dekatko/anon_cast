@@ -4,8 +4,8 @@ import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
 import '../provider/firestore_provider.dart';
-import 'administrator_dashboard_screen.dart';
-import 'administrator_register_screen.dart';
+import 'admin_dashboard_screen.dart';
+import 'admin_register_screen.dart';
 
 final log = Logger();
 

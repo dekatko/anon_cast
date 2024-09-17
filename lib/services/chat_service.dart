@@ -13,10 +13,8 @@ final log = Logger();
 
 class ChatService {
   final String key; // Encryption key (assumed to be securely stored)
-  final CollectionReference _chat_sessions =
-      FirebaseFirestore.instance.collection('chat_sessions');
-  final CollectionReference _admins =
-      FirebaseFirestore.instance.collection('administrators');
+  final CollectionReference _chat_sessions = FirebaseFirestore.instance.collection('chat_sessions');
+  final CollectionReference _admins = FirebaseFirestore.instance.collection('administrators');
 
   ChatService(this.key);
 
@@ -127,8 +125,7 @@ class ChatService {
   }
 
   Future<DocumentSnapshot?> _findAdminByCode(String adminCode) async {
-    final snapshot =
-        await _admins.where('adminCode', isEqualTo: adminCode).get();
+    final snapshot = await _admins.where('adminCode', isEqualTo: adminCode).get();
     return snapshot.docs.isNotEmpty ? snapshot.docs.first : null;
   }
 

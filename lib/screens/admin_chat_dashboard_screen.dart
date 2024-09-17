@@ -34,12 +34,16 @@ class _AdministratorChatDashboardScreenState extends State<AdministratorChatDash
               itemCount: chatSessions.length,
               itemBuilder: (context, index) {
                 final chatSession = chatSessions[index];
-                // Display chat session details (e.g., participants, last message)
-                return ListTile(
-                  title: Text('Chat with ${chatSession.studentId}'),
-                  subtitle: Text(chatSession.messages.last.encryptedContent),
-                  onTap: () => // Handle chat session tap (e.g., navigate to chat details)
-                  print('Navigate to chat details for ${chatSession.id}'),
+                final lastMessage = chatSession.messages.isNotEmpty ? chatSession.messages.last : null;
+                final truncatedMessage = lastMessage?.encryptedContent.split(' ').take(12).join(' '); // Truncate message to 12 words
+
+                return Card(
+                  child: ListTile(
+                    title: Text('Chat with ${chatSession.studentId}'),
+                    subtitle: Text('$truncatedMessage...'),
+                    onTap: () => // Handle chat session tap (e.g., navigate to chat details)
+                    print('Navigate to chat details for ${chatSession.id}'),
+                  ),
                 );
               },
             );

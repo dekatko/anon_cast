@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 import '../models/chat_session.dart';
-import '../screens/administrator_chat_dashboard_screen.dart'; // Import Chat Dashboard Screen
-import '../screens/administrator_system_settings_screen.dart'; // Import Settings Screen (replace with actual class name)
+import '../screens/admin_chat_dashboard_screen.dart'; // Import Chat Dashboard Screen
+import '../screens/admin_system_settings_screen.dart'; // Import Settings Screen (replace with actual class name)
 
 class AdministratorDashboardScreen extends StatefulWidget {
   const AdministratorDashboardScreen({super.key});
