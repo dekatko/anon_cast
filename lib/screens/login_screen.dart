@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
+
 import '../models/user.dart';
 import '../models/user_role.dart';
 import '../provider/user_provider.dart';
@@ -63,11 +64,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.tealAccent, // Light pink pastel
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                        20.0), // Rounded corners
+                    borderRadius:
+                        BorderRadius.circular(20.0), // Rounded corners
                   ),
-                  minimumSize: const Size(
-                      double.infinity, 50.0), // Wider button
+                  minimumSize:
+                      const Size(double.infinity, 50.0), // Wider button
                 ),
                 child: const Text(
                   'Anonymous Login',
@@ -116,11 +117,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
     // Combined check for user and adminCode
     if (uid != null && adminCode.isNotEmpty) {
-
       _setOrCreateHiveUserInProvider(context, uid);
       // Check for existing chat session (if user and adminCode are present)
-      final existingChat = await chatService.checkForExistingChat(
-          uid!, adminCode);
+      final existingChat =
+          await chatService.getExistingOrNewChat(uid!, adminCode);
       if (existingChat != null) {
         log.i("Existing chat found, joining...");
         // Join the existing chat session
@@ -156,7 +156,6 @@ class _LoginScreenState extends State<LoginScreen> {
         id: uid!,
         name: 'Anonymous',
         role: UserRole.student,
-        password: '', // Empty password for anonymous user
       );
       userBox.put(uid, anonymousUser);
       userProvider.setUser(anonymousUser);

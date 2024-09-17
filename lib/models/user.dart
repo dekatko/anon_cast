@@ -8,26 +8,21 @@ class User extends HiveObject {
   final String id;
   final String name;
   final UserRole role; //"primary_admin", "secondary_admin", or "student"
-  final String? password;
 
   User({
     required this.id,
     required this.name,
     required this.role,
-    this.password,
   });
 
-  factory User.fromJson(Map<String, dynamic> json) =>
-      User(
+  factory User.fromJson(Map<String, dynamic> json) => User(
         id: json['id'] as String,
         name: json['name'] as String,
         role: json['role'] as UserRole,
-        password: '',
       );
 
   // Additional methods can be added here, like converting to a JSON map
-  Map<String, dynamic> toJson() =>
-      {
+  Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
         'role': role,
@@ -35,11 +30,9 @@ class User extends HiveObject {
 
   factory User.fromMap(Map<String, dynamic> map) {
     return User(
-      id: map['id'] as String,
-      name: map['name'] as String,
-      role: map['role'] as UserRole,
-      password: '',
-    );
+        id: map['id'] as String,
+        name: map['name'] as String,
+        role: map['role'] as UserRole);
   }
 
   Map<String, dynamic> toMap() {
