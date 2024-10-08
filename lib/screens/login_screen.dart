@@ -9,7 +9,6 @@ import '../provider/user_provider.dart';
 import '../services/authentication_service.dart';
 import '../services/chat_service.dart';
 import 'admin_login_screen.dart';
-import 'administrator_login_screen.dart';
 import 'chat_screen.dart';
 
 final log = Logger();
@@ -79,12 +78,16 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 20.0),
               Text(
-                _errorMessage, // Display login error message (if any)
+                _errorMessage.isNotEmpty ? _errorMessage : '', // Display login error message (if any)
                 style: const TextStyle(color: Colors.red, fontSize: 12.0),
               ),
               TextButton(
                 onPressed: () {
                   log.i('Administrator Login button pressed');
+                  setState(() {
+                    _isLoading = true;
+                    _errorMessage = ''; // Clear previous error
+                  });
                   // Navigate to administrator login screen
                   Navigator.push(
                     context,
@@ -116,16 +119,23 @@ class _LoginScreenState extends State<LoginScreen> {
     var adminCode = _adminCodeController.text;
     log.i("_loginAnonymousUser() - uid: $uid, adminCode: $adminCode");
 
-    // Combined check for user and adminCode
-    if (uid != null && adminCode.isNotEmpty) {
+    if(adminCode.isEmpty) {
+      log.i("No Admin Code Entered!");
+      setState(() {
+        _errorMessage = "Please enter an Admin Code";
+      });
+
+    } else if (uid != null) {
+      setState(() {
+        _errorMessage = '';
+      });
+
       _setOrCreateHiveUserInProvider(context, uid);
-      // Check for existing chat session (if user and adminCode are present)
-      final existingChat =
-          await chatService.getExistingOrNewChat(uid!, adminCode);
+      // Check for existing chat session (if user and adminCode are present, returns null if adminCode does not exist)
+      final existingChat = await chatService.getExistingOrNewChat(uid!, adminCode);
+
       if (existingChat != null) {
         log.i("Existing chat found, joining...");
-        // Join the existing chat session
-        // ... (your logic for joining based on existingChat data)
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -133,15 +143,10 @@ class _LoginScreenState extends State<LoginScreen> {
         );
         return; // Exit the function if existing chat is joined
       } else {
-        log.i("No existing chat found, creating new chat...");
-        // Create a new chat session
-        // ... (your logic for creating a new chat session using uid and adminCode)
-        final newChat = await chatService.createChat(uid!, adminCode);
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => ChatScreen(chatSession: newChat)),
-        );
+        log.i("Wrong Admin Code entered");
+        setState(() {
+          _errorMessage = "Wrong Admin Code entered";
+        });
       }
     }
   }

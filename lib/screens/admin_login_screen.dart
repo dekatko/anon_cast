@@ -107,10 +107,10 @@ class _AdministratorLoginScreenState extends State<AdministratorLoginScreen> {
   Future<UserCredential?> loginAdministrator() async {
     final auth = FirebaseAuth.instance;
     try {
-      if(_email == '') {
+      if(_email.isEmpty) {
         _errorMessage = "No Email Entered!";
         return null;
-      } else if(_password == '') {
+      } else if(_password.isEmpty) {
         _errorMessage = "No Password Entered!";
         return null;
       }

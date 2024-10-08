@@ -42,8 +42,59 @@ class _ChatScreenState extends State<ChatScreen> {
     log.i("initState ChatScreen");
     super.initState();
     _chatSessionBox = Hive.box<ChatSession>('chat_sessions');
+    log.i("Generating Ephemeral Keys");
     // _generateEphemeralKeyPair();
     // Fetch messages for the chat room using chat_service.dart
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Chat Room'),
+      ),
+      body: FutureBuilder<ChatSession?>(
+        future: _loadOrCreateChatSession(), // Replace with your actual method call
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            final session = snapshot.data!;
+            // Access messages from the loaded session
+            return Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: session.messages.length, // Use messages from session
+                    itemBuilder: (context, index) {
+                      final message = session.messages[index];
+                      // return ChatMessageTile(message: message); // Widget for displaying messages
+                    },
+                  ),
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _messageController,
+                        decoration: const InputDecoration(hintText: "Enter message"),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.send),
+                      onPressed: _sendMessage,
+                    ),
+                  ],
+                ),
+              ],
+            );
+          } else if (snapshot.hasError) {
+            return const Center(child: Text('Error loading session'));
+          } else {
+            return const Center(child: CircularProgressIndicator());
+          }
+        },
+      ),
+    );
   }
 
   Future<void> _generateEphemeralKeyPair() async {
@@ -129,55 +180,5 @@ class _ChatScreenState extends State<ChatScreen> {
       _loadSessionFuture = _loadOrCreateChatSession(); // Reload session data
       setState(() {}); // Trigger a rebuild to reflect changes
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Chat Room'),
-      ),
-      body: FutureBuilder<ChatSession?>(
-        future: _loadOrCreateChatSession(), // Replace with your actual method call
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            final session = snapshot.data!;
-            // Access messages from the loaded session
-            return Column(
-              children: [
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: session.messages.length, // Use messages from session
-                    itemBuilder: (context, index) {
-                      final message = session.messages[index];
-                      // return ChatMessageTile(message: message); // Widget for displaying messages
-                    },
-                  ),
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _messageController,
-                        decoration: const InputDecoration(hintText: "Enter message"),
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.send),
-                      onPressed: _sendMessage,
-                    ),
-                  ],
-                ),
-              ],
-            );
-          } else if (snapshot.hasError) {
-            return const Center(child: Text('Error loading session'));
-          } else {
-            return const Center(child: CircularProgressIndicator());
-          }
-        },
-      ),
-    );
   }
 }
