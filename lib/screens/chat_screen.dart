@@ -42,7 +42,7 @@ class _ChatScreenState extends State<ChatScreen> {
     log.i("initState ChatScreen");
     super.initState();
     _chatSessionBox = Hive.box<ChatSession>('chat_sessions');
-    log.i("Generating Ephemeral Keys");
+    // log.i("Generating Ephemeral Keys");
     // _generateEphemeralKeyPair();
     // Fetch messages for the chat room using chat_service.dart
   }
@@ -102,12 +102,12 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<ChatSession?> _loadOrCreateChatSession() async {
-    final user = Provider.of<UserProvider>(context).user;
-    final chatSessionProvider = Provider.of<ChatSessionProvider>(context, listen: false);
-    final chatSession = await chatSessionProvider.chatSession;
+    final userProvider = Provider.of<UserProvider>(context);
+    final chatSession = widget.chatSession;
 
     try {
       final chatSessionId = chatSession?.id;
+      final user = userProvider.getUserById(chatSession.studentId);
       final sessionData = _chatSessionBox?.get(chatSession?.id);
 
       if (sessionData != null) {
