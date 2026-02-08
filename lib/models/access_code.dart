@@ -51,6 +51,7 @@ class AccessCode {
     this.createdByAdminId,
     this.usedByUserId,
     this.organizationId,
+    this.conversationId,
   });
 
   final String id;
@@ -63,10 +64,15 @@ class AccessCode {
   final DateTime? revokedAt;
   final String? createdByAdminId;
   final String? usedByUserId;
+
   /// Optional. When set, security rules can restrict access by organization.
   final String? organizationId;
 
+  /// Conversation ID for E2E key exchange; set when code is created with [AccessCodeService].
+  final String? conversationId;
+
   bool get isActive => status == AccessCodeStatus.active;
+  bool get used => usedAt != null;
   bool get isExpired =>
       status == AccessCodeStatus.expired ||
       (status == AccessCodeStatus.active && DateTime.now().isAfter(expiresAt));
@@ -79,6 +85,7 @@ class AccessCode {
       if (v is int) return DateTime.fromMillisecondsSinceEpoch(v);
       return DateTime.now();
     }
+
     return AccessCode(
       id: doc.id,
       code: data['code'] as String? ?? '',
@@ -88,9 +95,10 @@ class AccessCode {
       singleUse: data['singleUse'] as bool? ?? false,
       usedAt: data['usedAt'] != null ? ts(data['usedAt']) : null,
       revokedAt: data['revokedAt'] != null ? ts(data['revokedAt']) : null,
-      createdByAdminId: data['createdByAdminId'] as String?,
-      usedByUserId: data['usedByUserId'] as String?,
+      createdByAdminId: data['createdByAdminId'] as String? ?? data['createdBy'] as String?,
+      usedByUserId: data['usedByUserId'] as String? ?? data['usedBy'] as String?,
       organizationId: data['organizationId'] as String?,
+      conversationId: data['conversationId'] as String?,
     );
   }
 
@@ -109,6 +117,30 @@ class AccessCode {
       if (createdByAdminId != null) 'createdByAdminId': createdByAdminId,
       if (usedByUserId != null) 'usedByUserId': usedByUserId,
       if (organizationId != null) 'organizationId': organizationId,
+      if (conversationId != null) 'conversationId': conversationId,
     };
   }
+}
+
+/// Returned by [AccessCodeService.generateAccessCode]: code, QR payload, expiry.
+/// Use [qrCodeData] for QR display so students can scan to pre-fill the code.
+class AccessCodeData {
+  const AccessCodeData({
+    required this.code,
+    required this.conversationId,
+    required this.expiresAt,
+    required this.singleUse,
+    this.qrCodeData,
+  });
+
+  /// The 6-character code (e.g. "ABC123").
+  final String code;
+  /// Conversation ID for messaging; store locally for this session.
+  final String conversationId;
+  /// When the code expires.
+  final DateTime expiresAt;
+  /// Whether the code is single-use.
+  final bool singleUse;
+  /// Optional payload for QR code (e.g. JSON or plain code) for students to scan.
+  final String? qrCodeData;
 }
