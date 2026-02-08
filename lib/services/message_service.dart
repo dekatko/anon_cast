@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
 
+import '../models/conversation_key.dart';
 import '../models/message.dart';
 import '../models/pending_message.dart';
 import 'encryption_service.dart';
@@ -203,6 +204,7 @@ class MessageService {
       return localId;
     }
 
+    final keyVersion = (await _storage.getConversationKeyFull(conversationId))?.version ?? 1;
     for (var attempt = 0; attempt < _maxRetries; attempt++) {
       try {
         final data = {
@@ -214,6 +216,7 @@ class MessageService {
           'preview': content.length > 100 ? '${content.substring(0, 100)}…' : content,
           'timestamp': FieldValue.serverTimestamp(),
           'status': 'unread',
+          'keyVersion': keyVersion,
         };
         final messageId = await _relay.add(data);
         final message = Message(
@@ -227,6 +230,7 @@ class MessageService {
           iv: _ivToList(encrypted.iv),
           preview: data['preview'] as String?,
           senderType: senderType,
+          keyVersion: keyVersion,
         );
         await _storage.storeMessage(message);
         _log.d('MessageService: sent message $messageId');
@@ -276,19 +280,30 @@ class MessageService {
     return base64Decode(ivBase64);
   }
 
+  /// Resolves key string for [conversationId] and [keyVersion] (current or historical).
+  Future<String?> _getKeyForVersion(String conversationId, int keyVersion) async {
+    final ck = await _storage.getConversationKeyFull(conversationId);
+    if (ck == null) return null;
+    if (ck.version == keyVersion) return ck.key;
+    for (final k in ck.oldKeys) {
+      if (k.version == keyVersion) return k.key;
+    }
+    return null;
+  }
+
   /// Listens to Firestore, decrypts new/updated messages, stores in Hive, emits list from Hive.
   Stream<List<Message>> watchConversation(String conversationId) async* {
     if (conversationId.isEmpty) return;
-    String? key;
+    ConversationKey? ck;
     try {
-      key = await _storage.getConversationKey(conversationId);
+      ck = await _storage.getConversationKeyFull(conversationId);
     } catch (e, st) {
       _log.e('MessageService: get key failed in watch', error: e, stackTrace: st);
     }
-    if (key == null || key.isEmpty) {
-        _log.w('MessageService: no key for conversation $conversationId; cannot decrypt');
-        yield await _storage.getConversationMessages(conversationId);
-        return;
+    if (ck == null || ck.key.isEmpty) {
+      _log.w('MessageService: no key for conversation $conversationId; cannot decrypt');
+      yield await _storage.getConversationMessages(conversationId);
+      return;
     }
 
     final snapshots = _relay.watch(conversationId);
@@ -302,6 +317,7 @@ class MessageService {
         final data = doc.data();
         final encryptedContent = data['encryptedContent'] as String? ?? '';
         final ivRaw = data['iv'];
+        final keyVersion = data['keyVersion'] as int? ?? 1;
         if (encryptedContent.isEmpty) continue;
         String? ivBase64;
         if (ivRaw is List) {
@@ -310,6 +326,11 @@ class MessageService {
           continue;
         }
         if (ivBase64 == null) continue;
+        final key = await _getKeyForVersion(conversationId, keyVersion);
+        if (key == null || key.isEmpty) {
+          _log.w('MessageService: no key for version $keyVersion (doc ${doc.id})');
+          continue;
+        }
         try {
           final plaintext = await _encryption.decryptMessage(encryptedContent, ivBase64, key);
           final convId = data['conversationId'] as String? ?? conversationId;
@@ -330,6 +351,7 @@ class MessageService {
             iv: ivRaw is List ? ivRaw.cast<int>() : null,
             preview: data['preview'] as String?,
             senderType: data['senderType'] as String?,
+            keyVersion: keyVersion,
           );
           await _storage.storeMessage(msg);
         } on EncryptionServiceException catch (e) {

@@ -175,6 +175,30 @@ class LocalStorageService implements MessageServiceStorage {
   }
 
   @override
+  Future<ConversationKey?> getConversationKeyFull(String conversationId) async {
+    if (!_initialized) await init();
+    try {
+      return _conversationKeys.get(conversationId);
+    } catch (e, st) {
+      _log.e('LocalStorageService: getConversationKeyFull failed', error: e, stackTrace: st);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> storeConversationKeyFull(String conversationId, ConversationKey key) async {
+    if (!_initialized) await init();
+    if (conversationId.isEmpty) throw ArgumentError('conversationId must not be empty');
+    try {
+      await _conversationKeys.put(conversationId, key);
+      _log.d('LocalStorageService: stored full key for $conversationId');
+    } catch (e, st) {
+      _log.e('LocalStorageService: storeConversationKeyFull failed', error: e, stackTrace: st);
+      rethrow;
+    }
+  }
+
+  @override
   Future<List<String>> getAllMessageIds() async {
     if (!_initialized) await init();
     try {

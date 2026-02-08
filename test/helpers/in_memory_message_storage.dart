@@ -1,10 +1,11 @@
+import 'package:anon_cast/models/conversation_key.dart';
 import 'package:anon_cast/models/message.dart';
 import 'package:anon_cast/services/message_storage_interface.dart';
 
 /// In-memory [MessageServiceStorage] for unit tests (no Hive).
 class InMemoryMessageStorage implements MessageServiceStorage {
   final Map<String, Message> _messages = {};
-  final Map<String, String> _conversationKeys = {};
+  final Map<String, ConversationKey> _conversationKeys = {};
   final Map<String, String> _userPrefs = {};
 
   @override
@@ -26,16 +27,37 @@ class InMemoryMessageStorage implements MessageServiceStorage {
 
   @override
   Future<void> storeConversationKey(String conversationId, String key) async {
-    _conversationKeys[conversationId] = key;
+    final now = DateTime.now();
+    _conversationKeys[conversationId] = ConversationKey(
+      id: conversationId,
+      key: key,
+      createdAt: now,
+      lastRotated: now,
+    );
   }
 
   @override
   Future<String?> getConversationKey(String conversationId) async =>
+      _conversationKeys[conversationId]?.key;
+
+  @override
+  Future<ConversationKey?> getConversationKeyFull(String conversationId) async =>
       _conversationKeys[conversationId];
 
   @override
-  Future<Map<String, String>> getAllConversationKeys() async =>
-      Map<String, String>.from(_conversationKeys);
+  Future<void> storeConversationKeyFull(
+      String conversationId, ConversationKey key) async {
+    _conversationKeys[conversationId] = key;
+  }
+
+  @override
+  Future<Map<String, String>> getAllConversationKeys() async {
+    final map = <String, String>{};
+    for (final e in _conversationKeys.entries) {
+      if (e.value.key.isNotEmpty) map[e.key] = e.value.key;
+    }
+    return map;
+  }
 
   @override
   Future<List<String>> getAllMessageIds() async => _messages.keys.toList();

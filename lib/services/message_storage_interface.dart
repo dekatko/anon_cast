@@ -1,3 +1,4 @@
+import '../models/conversation_key.dart';
 import '../models/message.dart';
 
 /// Abstraction for message and key storage used by [MessageService].
@@ -8,6 +9,10 @@ abstract interface class MessageServiceStorage {
   Future<List<Message>> getConversationMessages(String conversationId);
   Future<void> storeConversationKey(String conversationId, String key);
   Future<String?> getConversationKey(String conversationId);
+  /// Full key object (version, oldKeys) for rotation and versioned decryption.
+  Future<ConversationKey?> getConversationKeyFull(String conversationId);
+  /// Store full key (e.g. after rotation).
+  Future<void> storeConversationKeyFull(String conversationId, ConversationKey key);
   /// All conversation keys (id -> base64 key). For export and secure wipe.
   Future<Map<String, String>> getAllConversationKeys();
   /// All message IDs in storage. For secure wipe.

@@ -1,3 +1,4 @@
+import 'package:anon_cast/models/conversation_key.dart';
 import 'package:anon_cast/models/message.dart';
 import 'package:anon_cast/services/encryption_service.dart';
 import 'package:anon_cast/services/message_relay.dart';
@@ -212,6 +213,20 @@ class _ThrowingStorage implements MessageServiceStorage {
 
   @override
   Future<String?> getConversationKey(String conversationId) async => null;
+
+  @override
+  Future<ConversationKey?> getConversationKeyFull(String conversationId) async =>
+      null;
+
+  @override
+  Future<void> storeConversationKeyFull(
+      String conversationId, ConversationKey key) async {}
+
+  @override
+  Future<Map<String, String>> getAllConversationKeys() async => {};
+
+  @override
+  Future<List<String>> getAllMessageIds() async => [];
 
   @override
   Future<void> deleteMessage(String messageId) async {}

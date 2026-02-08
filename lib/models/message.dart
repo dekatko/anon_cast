@@ -52,6 +52,7 @@ class Message {
     this.iv,
     this.preview,
     this.senderType,
+    this.keyVersion,
   });
 
   /// Server document id or local id.
@@ -74,6 +75,8 @@ class Message {
   final String? preview;
   /// 'admin' or 'anonymous'.
   final String? senderType;
+  /// Encryption key version used for this message (null => 1). For versioned decryption.
+  final int? keyVersion;
 
   /// True when [encryptedContent] is non-empty and decryption is needed to obtain plaintext
   /// (i.e. [content] is null or empty).
@@ -107,6 +110,7 @@ class Message {
       iv: (data['iv'] as List<dynamic>?)?.cast<int>(),
       preview: data['preview'] as String?,
       senderType: data['senderType'] as String?,
+      keyVersion: data['keyVersion'] as int?,
     );
   }
 
@@ -121,6 +125,7 @@ class Message {
       if (iv != null && iv!.isNotEmpty) 'iv': iv,
       if (preview != null) 'preview': preview,
       if (senderType != null) 'senderType': senderType,
+      if (keyVersion != null) 'keyVersion': keyVersion,
     };
   }
 
@@ -137,6 +142,7 @@ class Message {
       if (iv != null) 'iv': iv,
       if (preview != null) 'preview': preview,
       if (senderType != null) 'senderType': senderType,
+      if (keyVersion != null) 'keyVersion': keyVersion,
     };
   }
 
@@ -159,6 +165,7 @@ class Message {
       iv: (map['iv'] as List<dynamic>?)?.cast<int>(),
       preview: map['preview'] as String?,
       senderType: map['senderType'] as String?,
+      keyVersion: map['keyVersion'] as int?,
     );
   }
 
@@ -173,6 +180,7 @@ class Message {
     List<int>? iv,
     String? preview,
     String? senderType,
+    int? keyVersion,
   }) {
     return Message(
       id: id ?? this.id,
@@ -185,6 +193,7 @@ class Message {
       iv: iv ?? this.iv,
       preview: preview ?? this.preview,
       senderType: senderType ?? this.senderType,
+      keyVersion: keyVersion ?? this.keyVersion,
     );
   }
 
@@ -213,6 +222,7 @@ class MessageAdapter extends TypeAdapter<Message> {
       if (ts is int) dateTime = DateTime.fromMillisecondsSinceEpoch(ts);
       if (ts is num) dateTime = DateTime.fromMillisecondsSinceEpoch(ts.toInt());
     }
+    final keyVersion = numOfFields >= 11 && fields[10] != null ? fields[10] as int? : null;
     return Message(
       id: fields[0] as String? ?? '',
       conversationId: fields[1] as String? ?? '',
@@ -224,13 +234,14 @@ class MessageAdapter extends TypeAdapter<Message> {
       iv: (fields[7] as List<dynamic>?)?.cast<int>(),
       preview: fields[8] as String?,
       senderType: fields[9] as String?,
+      keyVersion: keyVersion,
     );
   }
 
   @override
   void write(BinaryWriter writer, Message obj) {
     writer
-      ..writeByte(10)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -250,7 +261,9 @@ class MessageAdapter extends TypeAdapter<Message> {
       ..writeByte(8)
       ..write(obj.preview)
       ..writeByte(9)
-      ..write(obj.senderType);
+      ..write(obj.senderType)
+      ..writeByte(10)
+      ..write(obj.keyVersion);
   }
 
   @override

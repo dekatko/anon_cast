@@ -9,6 +9,12 @@ abstract interface class MessageRelay {
   /// Stream of snapshots for messages in [conversationId], ordered by timestamp ascending.
   Stream<QuerySnapshot<Map<String, dynamic>>> watch(String conversationId);
 
+  /// Fetches all message documents for [conversationId] once (e.g. for key rotation).
+  Future<List<Map<String, dynamic>>> getMessages(String conversationId);
+
+  /// Updates an existing message document (e.g. re-encrypted content after rotation).
+  Future<void> update(String messageId, Map<String, dynamic> data);
+
   /// Deletes the message document [messageId]. Idempotent.
   Future<void> delete(String messageId);
 }
@@ -35,6 +41,23 @@ class FirestoreMessageRelay implements MessageRelay {
         .where('conversationId', isEqualTo: conversationId)
         .orderBy('timestamp', descending: false)
         .snapshots();
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getMessages(String conversationId) async {
+    final snapshot = await _firestore
+        .collection(_messagesCollection)
+        .where('conversationId', isEqualTo: conversationId)
+        .orderBy('timestamp', descending: false)
+        .get();
+    return snapshot.docs
+        .map((d) => <String, dynamic>{'id': d.id, ...d.data()})
+        .toList();
+  }
+
+  @override
+  Future<void> update(String messageId, Map<String, dynamic> data) async {
+    await _firestore.collection(_messagesCollection).doc(messageId).update(data);
   }
 
   @override
