@@ -3,7 +3,8 @@
 // ignore_for_file: lines_longer_than_80_chars, avoid_classes_with_only_static_members
 
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
-import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb, TargetPlatform;
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
@@ -31,7 +32,7 @@ class DefaultFirebaseOptions {
     apiKey: 'YOUR_ANDROID_API_KEY',
     appId: 'YOUR_ANDROID_APP_ID',
     messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
+    projectId: 'anon-cast',
     storageBucket: 'YOUR_PROJECT_ID.appspot.com',
   );
 
@@ -39,7 +40,7 @@ class DefaultFirebaseOptions {
     apiKey: 'YOUR_IOS_API_KEY',
     appId: 'YOUR_IOS_APP_ID',
     messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
+    projectId: 'anon-cast',
     storageBucket: 'YOUR_PROJECT_ID.appspot.com',
     iosBundleId: 'com.example.anonCast',
   );
@@ -48,7 +49,7 @@ class DefaultFirebaseOptions {
     apiKey: 'YOUR_WEB_API_KEY',
     appId: 'YOUR_WEB_APP_ID',
     messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
+    projectId: 'anon-cast',
     authDomain: 'YOUR_PROJECT_ID.firebaseapp.com',
     storageBucket: 'YOUR_PROJECT_ID.appspot.com',
     measurementId: 'G-XXXXXXXXXX',

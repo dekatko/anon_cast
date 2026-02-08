@@ -68,6 +68,42 @@ class AppLocalizations {
   String get markResolved =>
       _localizedValues[locale.languageCode]?['markResolved'] ?? 'Mark resolved';
 
+  // ——— Message thread ———
+  String get messageThreadTitle =>
+      _localizedValues[locale.languageCode]?['messageThreadTitle'] ?? 'Conversation';
+
+  String get typeMessageHint =>
+      _localizedValues[locale.languageCode]?['typeMessageHint'] ?? 'Type a message…';
+
+  String get send => _localizedValues[locale.languageCode]?['send'] ?? 'Send';
+
+  String get characterCount =>
+      _localizedValues[locale.languageCode]?['characterCount'] ?? 'Characters';
+
+  String get encryptionActive =>
+      _localizedValues[locale.languageCode]?['encryptionActive'] ?? 'Encrypted';
+
+  String get anonymousTyping =>
+      _localizedValues[locale.languageCode]?['anonymousTyping'] ?? 'Anonymous is typing…';
+
+  String get adminTyping =>
+      _localizedValues[locale.languageCode]?['adminTyping'] ?? 'Counselor is typing…';
+
+  String get readStatusRead =>
+      _localizedValues[locale.languageCode]?['readStatusRead'] ?? 'Read';
+
+  String get readStatusDelivered =>
+      _localizedValues[locale.languageCode]?['readStatusDelivered'] ?? 'Delivered';
+
+  String get messageFromAnonymous =>
+      _localizedValues[locale.languageCode]?['messageFromAnonymous'] ?? 'Message from anonymous user';
+
+  String get messageFromYou =>
+      _localizedValues[locale.languageCode]?['messageFromYou'] ?? 'Your message';
+
+  String get threadErrorSend =>
+      _localizedValues[locale.languageCode]?['threadErrorSend'] ?? 'Failed to send message';
+
   static const Map<String, Map<String, String>> _localizedValues = {
     'en': {
       'adminDashboardTitle': 'Messages',
@@ -90,6 +126,18 @@ class AppLocalizations {
       'reply': 'Reply',
       'markRead': 'Mark read',
       'markResolved': 'Mark resolved',
+      'messageThreadTitle': 'Conversation',
+      'typeMessageHint': 'Type a message…',
+      'send': 'Send',
+      'characterCount': 'Characters',
+      'encryptionActive': 'Encrypted',
+      'anonymousTyping': 'Anonymous is typing…',
+      'adminTyping': 'Counselor is typing…',
+      'readStatusRead': 'Read',
+      'readStatusDelivered': 'Delivered',
+      'messageFromAnonymous': 'Message from anonymous user',
+      'messageFromYou': 'Your message',
+      'threadErrorSend': 'Failed to send message',
     },
     'de': {
       'adminDashboardTitle': 'Nachrichten',
@@ -112,6 +160,18 @@ class AppLocalizations {
       'reply': 'Antworten',
       'markRead': 'Als gelesen markieren',
       'markResolved': 'Als erledigt markieren',
+      'messageThreadTitle': 'Unterhaltung',
+      'typeMessageHint': 'Nachricht eingeben…',
+      'send': 'Senden',
+      'characterCount': 'Zeichen',
+      'encryptionActive': 'Verschlüsselt',
+      'anonymousTyping': 'Anonym schreibt…',
+      'adminTyping': 'Berater:in schreibt…',
+      'readStatusRead': 'Gelesen',
+      'readStatusDelivered': 'Zugestellt',
+      'messageFromAnonymous': 'Nachricht von anonymem Nutzer',
+      'messageFromYou': 'Deine Nachricht',
+      'threadErrorSend': 'Nachricht konnte nicht gesendet werden',
     },
   };
 }

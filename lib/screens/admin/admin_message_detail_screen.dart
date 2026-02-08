@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/admin_message.dart';
 import '../../provider/admin_messages_provider.dart';
+import '../messages/message_thread_screen.dart';
 
 /// Message detail and reply screen for a single anonymous message.
 class AdminMessageDetailScreen extends StatelessWidget {
@@ -122,9 +123,20 @@ class AdminMessageDetailScreen extends StatelessWidget {
                     const SizedBox(height: 24),
                     FilledButton.icon(
                       onPressed: () {
-                        // Navigate to full conversation/reply UI if you have one
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('${l10n.reply} — conversation screen can be wired here')),
+                        final cid = message.conversationId;
+                        if (cid.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('No conversation ID')),
+                          );
+                          return;
+                        }
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (context) => MessageThreadScreen(
+                              conversationId: cid,
+                              initialMessage: message,
+                            ),
+                          ),
                         );
                       },
                       icon: const Icon(Icons.reply),

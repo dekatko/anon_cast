@@ -43,6 +43,7 @@ class AdminMessage {
     required this.status,
     this.iv,
     this.preview,
+    this.senderType,
   });
 
   final String id;
@@ -54,8 +55,11 @@ class AdminMessage {
   final List<int>? iv;
   /// Optional short preview (e.g. decrypted first 50 chars or placeholder).
   final String? preview;
+  /// 'admin' or 'anonymous'. Used for thread UI.
+  final String? senderType;
 
   bool get isUnread => status == MessageStatus.unread;
+  bool get isFromAdmin => senderType == 'admin';
 
   factory AdminMessage.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? <String, dynamic>{};
@@ -75,6 +79,30 @@ class AdminMessage {
       status: MessageStatusX.fromString(data['status'] as String?),
       iv: (data['iv'] as List<dynamic>?)?.cast<int>(),
       preview: data['preview'] as String?,
+      senderType: data['senderType'] as String?,
+    );
+  }
+
+  /// Use in thread screen when current user (admin) uid is known to derive senderType.
+  factory AdminMessage.fromFirestoreWithSenderType(
+    DocumentSnapshot<Map<String, dynamic>> doc,
+    String? currentAdminUid,
+  ) {
+    final msg = AdminMessage.fromFirestore(doc);
+    final data = doc.data() ?? <String, dynamic>{};
+    final type = data['senderType'] as String?;
+    final sid = data['senderId'] as String? ?? '';
+    final isAdmin = type == 'admin' || (currentAdminUid != null && sid == currentAdminUid);
+    return AdminMessage(
+      id: msg.id,
+      conversationId: msg.conversationId,
+      senderId: msg.senderId,
+      encryptedContent: msg.encryptedContent,
+      timestamp: msg.timestamp,
+      status: msg.status,
+      iv: msg.iv,
+      preview: msg.preview,
+      senderType: isAdmin ? 'admin' : 'anonymous',
     );
   }
 
@@ -87,6 +115,7 @@ class AdminMessage {
       'status': status.value,
       if (iv != null) 'iv': iv,
       if (preview != null) 'preview': preview,
+      if (senderType != null) 'senderType': senderType,
     };
   }
 
@@ -99,6 +128,7 @@ class AdminMessage {
     MessageStatus? status,
     List<int>? iv,
     String? preview,
+    String? senderType,
   }) {
     return AdminMessage(
       id: id ?? this.id,
@@ -109,6 +139,7 @@ class AdminMessage {
       status: status ?? this.status,
       iv: iv ?? this.iv,
       preview: preview ?? this.preview,
+      senderType: senderType ?? this.senderType,
     );
   }
 }
