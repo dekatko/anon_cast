@@ -23,6 +23,8 @@ import 'package:workmanager/workmanager.dart';
 
 import 'firebase_options.dart';
 import 'models/chat_message.dart';
+import 'models/conversation_key.dart';
+import 'models/message.dart';
 import 'models/user.dart';
 import 'models/user_role.dart';
 import 'provider/user_provider.dart';
@@ -46,6 +48,8 @@ void main() async {
   Hive.registerAdapter(UserAdapter());
   Hive.registerAdapter(UserRoleAdapter());
   Hive.registerAdapter(ChatSessionAdapter());
+  Hive.registerAdapter(MessageAdapter());
+  Hive.registerAdapter(ConversationKeyAdapter());
 
   await Hive.openBox<User>('users');
   await Hive.openBox<ChatSession>('chat_sessions');
