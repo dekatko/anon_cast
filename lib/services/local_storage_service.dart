@@ -174,7 +174,19 @@ class LocalStorageService implements MessageServiceStorage {
     }
   }
 
+  @override
+  Future<List<String>> getAllMessageIds() async {
+    if (!_initialized) await init();
+    try {
+      return _messages.keys.cast<String>().toList();
+    } catch (e, st) {
+      _log.e('LocalStorageService: getAllMessageIds failed', error: e, stackTrace: st);
+      rethrow;
+    }
+  }
+
   /// Returns all conversation keys (id -> base64 key). Used for key export/backup.
+  @override
   Future<Map<String, String>> getAllConversationKeys() async {
     if (!_initialized) await init();
     try {
@@ -277,6 +289,19 @@ class LocalStorageService implements MessageServiceStorage {
       _log.d('LocalStorageService: deleted conversation $conversationId (${toRemove.length} messages)');
     } catch (e, st) {
       _log.e('LocalStorageService: deleteConversation failed', error: e, stackTrace: st);
+      rethrow;
+    }
+  }
+
+  /// Deletes only the conversation key (not messages). Used after secure overwrite.
+  Future<void> deleteConversationKey(String conversationId) async {
+    if (!_initialized) await init();
+    if (conversationId.isEmpty) return;
+    try {
+      await _conversationKeys.delete(conversationId);
+      _log.d('LocalStorageService: deleted key for $conversationId');
+    } catch (e, st) {
+      _log.e('LocalStorageService: deleteConversationKey failed', error: e, stackTrace: st);
       rethrow;
     }
   }

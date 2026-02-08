@@ -34,6 +34,13 @@ class InMemoryMessageStorage implements MessageServiceStorage {
       _conversationKeys[conversationId];
 
   @override
+  Future<Map<String, String>> getAllConversationKeys() async =>
+      Map<String, String>.from(_conversationKeys);
+
+  @override
+  Future<List<String>> getAllMessageIds() async => _messages.keys.toList();
+
+  @override
   Future<void> deleteMessage(String messageId) async {
     _messages.remove(messageId);
   }
@@ -41,6 +48,11 @@ class InMemoryMessageStorage implements MessageServiceStorage {
   @override
   Future<void> deleteConversation(String conversationId) async {
     _messages.removeWhere((_, m) => m.conversationId == conversationId);
+    _conversationKeys.remove(conversationId);
+  }
+
+  @override
+  Future<void> deleteConversationKey(String conversationId) async {
     _conversationKeys.remove(conversationId);
   }
 
