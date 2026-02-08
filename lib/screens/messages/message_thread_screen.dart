@@ -8,6 +8,9 @@ import '../../l10n/app_localizations.dart';
 import '../../models/admin_message.dart';
 import '../../provider/firestore_provider.dart';
 import '../../provider/message_thread_provider.dart';
+import '../../services/message_sync_service.dart';
+import '../../widgets/offline_indicator.dart';
+import '../../widgets/sync_status_badge.dart';
 import 'widgets/message_bubble.dart';
 import 'widgets/typing_indicator.dart';
 
@@ -62,12 +65,18 @@ class _MessageThreadScreenState extends State<MessageThreadScreen> {
     return ChangeNotifierProvider<MessageThreadProvider>(
       create: (context) {
         final firestore = context.read<FirestoreProvider>().firestore;
-        final uid = FirebaseAuth.instance.currentUser?.uid;
+        final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+        final syncService = MessageSyncService(
+          firestore: firestore,
+          currentUserId: uid,
+          isAdmin: () => !(FirebaseAuth.instance.currentUser?.isAnonymous ?? true),
+        );
         final p = MessageThreadProvider(
           firestore: firestore,
           conversationId: widget.conversationId,
           currentUserIsAdmin: true,
-          currentAdminUid: uid,
+          currentAdminUid: uid.isEmpty ? null : uid,
+          syncService: syncService,
         );
         p.startListening();
         return p;
@@ -121,6 +130,12 @@ class _MessageThreadBodyState extends State<_MessageThreadBody> {
       ),
       body: Column(
         children: [
+          Consumer<MessageThreadProvider>(
+            builder: (context, provider, _) {
+              if (!provider.isOffline) return const SizedBox.shrink();
+              return OfflineIndicator(isOffline: true);
+            },
+          ),
           Expanded(
             child: Consumer<MessageThreadProvider>(
               builder: (context, provider, _) {
@@ -156,22 +171,24 @@ class _MessageThreadBodyState extends State<_MessageThreadBody> {
                   return const Center(child: CircularProgressIndicator());
                 }
 
+                final syncedList = provider.syncedMessages;
                 final messages = provider.messages;
                 final typing = provider.typing;
+                final count = messages.length;
 
-                if (messages.length > _lastMessageCount) {
+                if (count > _lastMessageCount) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     widget.onScrollToBottom();
                   });
                 }
-                _lastMessageCount = messages.length;
+                _lastMessageCount = count;
 
                 return ListView.builder(
                   controller: widget.scrollController,
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  itemCount: messages.length + (typing.anyoneTyping ? 1 : 0),
+                  itemCount: count + (typing.anyoneTyping ? 1 : 0),
                   itemBuilder: (context, index) {
-                    if (index == messages.length) {
+                    if (index == count) {
                       final label = typing.adminTyping
                           ? l10n.adminTyping
                           : l10n.anonymousTyping;
@@ -185,14 +202,35 @@ class _MessageThreadBodyState extends State<_MessageThreadBody> {
                     final semanticsLabel = message.isFromAdmin
                         ? l10n.messageFromYou
                         : l10n.messageFromAnonymous;
+                    final syncStatus = index < syncedList.length
+                        ? syncedList[index].syncStatus
+                        : null;
+                    final showSyncBadge = message.isFromAdmin && syncStatus != null;
 
-                    return MessageBubble(
+                    final bubble = MessageBubble(
                       message: message,
                       timeFormatted: timeStr,
                       readStatusLabel: readLabel,
                       semanticsLabel: semanticsLabel,
                       isEncrypted: message.encryptedContent.isNotEmpty,
                     );
+
+                    if (showSyncBadge) {
+                      return Align(
+                        alignment: Alignment.centerRight,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            SyncStatusBadge(status: syncStatus, size: 16),
+                            const SizedBox(width: 4),
+                            bubble,
+                          ],
+                        ),
+                      );
+                    }
+                    return bubble;
                   },
                 );
               },

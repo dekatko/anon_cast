@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
 import '../models/admin_message.dart';
+import '../models/synced_message.dart';
+import '../services/message_sync_service.dart';
 
 /// Typing state for the thread (who is currently typing).
 class ThreadTypingState {
@@ -16,21 +18,30 @@ class ThreadTypingState {
 }
 
 /// Provides real-time messages and typing for a single conversation thread.
+/// When [syncService] is provided, messages use offline queue, cache, and sync status.
 class MessageThreadProvider extends ChangeNotifier {
   MessageThreadProvider({
     required FirebaseFirestore firestore,
     required this.conversationId,
     required this.currentUserIsAdmin,
     this.currentAdminUid,
-  }) : _firestore = firestore;
+    MessageSyncService? syncService,
+  })  : _firestore = firestore,
+        _syncService = syncService;
 
   final FirebaseFirestore _firestore;
+  final MessageSyncService? _syncService;
   final String conversationId;
   final bool currentUserIsAdmin;
   final String? currentAdminUid;
 
   List<AdminMessage> _messages = [];
   List<AdminMessage> get messages => List.unmodifiable(_messages);
+
+  List<SyncedMessage> _syncedMessages = [];
+  /// When [syncService] is used, this is set so UI can show [SyncStatusBadge].
+  List<SyncedMessage> get syncedMessages =>
+      _syncService != null ? List.unmodifiable(_syncedMessages) : const [];
 
   bool _isLoading = true;
   bool get isLoading => _isLoading;
@@ -42,11 +53,16 @@ class MessageThreadProvider extends ChangeNotifier {
   bool _sending = false;
   bool get sending => _sending;
 
+  bool _isOffline = false;
+  bool get isOffline => _isOffline;
+
   ThreadTypingState _typing = const ThreadTypingState();
   ThreadTypingState get typing => _typing;
 
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _messageSub;
   StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? _typingSub;
+  StreamSubscription<List<SyncedMessage>>? _syncMessageSub;
+  StreamSubscription<bool>? _connectivitySub;
 
   static const int _maxChars = 500;
 
@@ -68,29 +84,52 @@ class MessageThreadProvider extends ChangeNotifier {
   void startListening() {
     _messageSub?.cancel();
     _typingSub?.cancel();
+    _syncMessageSub?.cancel();
+    _connectivitySub?.cancel();
     _isLoading = true;
     _error = null;
     notifyListeners();
 
-    _messageSub = _messagesCol
-        .where('conversationId', isEqualTo: conversationId)
-        .orderBy('timestamp', descending: false)
-        .snapshots()
-        .listen(
-          (snapshot) {
-            _messages = snapshot.docs
-                .map((d) => AdminMessage.fromFirestoreWithSenderType(d, currentAdminUid))
-                .toList();
-            _isLoading = false;
-            _error = null;
-            notifyListeners();
-          },
-          onError: (e, st) {
-            _error = e;
-            _isLoading = false;
-            notifyListeners();
-          },
-        );
+    if (_syncService != null) {
+      _syncMessageSub = _syncService!.watchConversation(conversationId).listen(
+            (list) {
+              _syncedMessages = list;
+              _messages = list.map((s) => s.message).toList();
+              _isLoading = false;
+              _error = null;
+              notifyListeners();
+            },
+            onError: (e, st) {
+              _error = e;
+              _isLoading = false;
+              notifyListeners();
+            },
+          );
+      _connectivitySub = _syncService!.connectivityStream.listen((online) {
+        _isOffline = !online;
+        notifyListeners();
+      });
+    } else {
+      _messageSub = _messagesCol
+          .where('conversationId', isEqualTo: conversationId)
+          .orderBy('timestamp', descending: false)
+          .snapshots()
+          .listen(
+            (snapshot) {
+              _messages = snapshot.docs
+                  .map((d) => AdminMessage.fromFirestoreWithSenderType(d, currentAdminUid))
+                  .toList();
+              _isLoading = false;
+              _error = null;
+              notifyListeners();
+            },
+            onError: (e, st) {
+              _error = e;
+              _isLoading = false;
+              notifyListeners();
+            },
+          );
+    }
 
     _typingSub = _typingDoc.snapshots().listen((snapshot) {
       final data = snapshot.data() ?? {};
@@ -115,18 +154,29 @@ class MessageThreadProvider extends ChangeNotifier {
     try {
       final content = plainText.trim();
       final enc = encryptedContent ?? content;
-      final ref = _messagesCol.doc();
-      final msg = {
-        'conversationId': conversationId,
-        'senderId': currentAdminUid ?? _firestore.collection('administrators').doc().id,
-        'senderType': currentUserIsAdmin ? 'admin' : 'anonymous',
-        'encryptedContent': enc,
-        'preview': content.length > 100 ? '${content.substring(0, 100)}…' : content,
-        'timestamp': FieldValue.serverTimestamp(),
-        'status': 'unread',
-        if (iv != null) 'iv': iv,
-      };
-      await ref.set(msg);
+      final preview = content.length > 100 ? '${content.substring(0, 100)}…' : content;
+
+      if (_syncService != null) {
+        await _syncService!.sendMessage(
+          conversationId: conversationId,
+          encryptedContent: enc,
+          preview: preview,
+          iv: iv,
+        );
+      } else {
+        final ref = _messagesCol.doc();
+        final msg = {
+          'conversationId': conversationId,
+          'senderId': currentAdminUid ?? _firestore.collection('administrators').doc().id,
+          'senderType': currentUserIsAdmin ? 'admin' : 'anonymous',
+          'encryptedContent': enc,
+          'preview': preview,
+          'timestamp': FieldValue.serverTimestamp(),
+          'status': 'unread',
+          if (iv != null) 'iv': iv,
+        };
+        await ref.set(msg);
+      }
       await _clearTyping();
     } catch (e) {
       _error = e;
@@ -168,13 +218,18 @@ class MessageThreadProvider extends ChangeNotifier {
   void stopListening() {
     _messageSub?.cancel();
     _typingSub?.cancel();
+    _syncMessageSub?.cancel();
+    _connectivitySub?.cancel();
     _messageSub = null;
     _typingSub = null;
+    _syncMessageSub = null;
+    _connectivitySub = null;
   }
 
   @override
   void dispose() {
     stopListening();
+    _syncService?.dispose();
     super.dispose();
   }
 }

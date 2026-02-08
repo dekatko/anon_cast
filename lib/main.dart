@@ -9,6 +9,7 @@ import 'package:anon_cast/screens/auth/anonymous_home_screen.dart';
 import 'package:anon_cast/screens/auth/login_screen.dart';
 import 'package:anon_cast/services/auth_service.dart';
 import 'package:anon_cast/services/chat_service.dart';
+import 'package:anon_cast/services/message_cache.dart';
 import 'package:anon_cast/services/rotation_scheduler.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
@@ -46,6 +47,7 @@ void main() async {
 
   await Hive.openBox<User>('users');
   await Hive.openBox<ChatSession>('chat_sessions');
+  await MessageCache.instance.init();
 
   // Workmanager uses native APIs (e.g. getCallbackHandle) not available on web.
   if (!kIsWeb) {
