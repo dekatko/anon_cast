@@ -6,10 +6,10 @@ class AdministratorSystemSettingsScreen extends StatefulWidget {
   const AdministratorSystemSettingsScreen({super.key});
 
   @override
-  _AdministratorSystemSettingsScreenState createState() => _AdministratorSystemSettingsScreenState();
+  AdministratorSystemSettingsScreenState createState() => AdministratorSystemSettingsScreenState();
 }
 
-class _AdministratorSystemSettingsScreenState extends State<AdministratorSystemSettingsScreen> {
+class AdministratorSystemSettingsScreenState extends State<AdministratorSystemSettingsScreen> {
   ConnectionType _selectedConnectionType = ConnectionType.wifiDirect; // Initial selection
 
   @override

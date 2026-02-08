@@ -79,7 +79,7 @@ class MessageBubble extends StatelessWidget {
                               color: (isFromAdmin
                                       ? theme.colorScheme.onPrimaryContainer
                                       : theme.colorScheme.onSurface)
-                                  .withOpacity(0.7),
+                                  .withValues(alpha: 0.7),
                             ),
                           ),
                           if (isFromAdmin) ...[
@@ -89,13 +89,13 @@ class MessageBubble extends StatelessWidget {
                                   ? Icons.done_all
                                   : Icons.done,
                               size: 14,
-                              color: theme.colorScheme.onPrimaryContainer.withOpacity(0.7),
+                              color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.7),
                             ),
                             const SizedBox(width: 2),
                             Text(
                               readStatusLabel,
                               style: theme.textTheme.labelSmall?.copyWith(
-                                color: theme.colorScheme.onPrimaryContainer.withOpacity(0.7),
+                                color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.7),
                               ),
                             ),
                           ],
@@ -113,7 +113,7 @@ class MessageBubble extends StatelessWidget {
                                 color: (isFromAdmin
                                         ? theme.colorScheme.onPrimaryContainer
                                         : theme.colorScheme.onSurface)
-                                    .withOpacity(0.6),
+                                    .withValues(alpha: 0.6),
                               ),
                               const SizedBox(width: 4),
                               Text(
@@ -122,7 +122,7 @@ class MessageBubble extends StatelessWidget {
                                   color: (isFromAdmin
                                           ? theme.colorScheme.onPrimaryContainer
                                           : theme.colorScheme.onSurface)
-                                      .withOpacity(0.6),
+                                      .withValues(alpha: 0.6),
                                 ),
                               ),
                             ],

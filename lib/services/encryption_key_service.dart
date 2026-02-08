@@ -1,13 +1,9 @@
-import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:pointycastle/export.dart';
 import 'package:anon_cast/platform_channels/secure_random_channel.dart';
 
 class EncryptionKeyService {
-  final _storage = const FlutterSecureStorage();
-
   Future<AsymmetricKeyPair<PublicKey, PrivateKey>> generateEphemeralKeyPair() async {
     var bytes = await SecureRandomChannel.generateSecureBytes(32);
     final Uint8List byteList = Uint8List.fromList(bytes);
@@ -37,6 +33,7 @@ class EncryptionKeyService {
 
   // Retrieve private key securely using flutter_secure_storage
   Future<PrivateKey?> retrievePrivateKey() async {
+    return null;
     // final privateKeyPem = await _storage.read(key: 'privateKey');
     //
     // if (privateKeyPem == null) {

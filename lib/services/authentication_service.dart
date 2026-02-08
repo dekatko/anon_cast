@@ -1,4 +1,5 @@
-import 'package:firebase_auth/firebase_auth.dart'; // Assuming Firebase Authentication
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
 class AuthenticationService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -14,13 +15,13 @@ class AuthenticationService {
       return userCredential;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
-        print('The password provided is too weak.');
+        debugPrint('The password provided is too weak.');
       } else if (e.code == 'email-already-in-use') {
-        print('The account already exists for that email.');
+        debugPrint('The account already exists for that email.');
       }
-      return null; // Handle other exceptions as needed
+      return null;
     } catch (e) {
-      print(e.toString()); // Log any other errors
+      debugPrint(e.toString());
       return null;
     }
   }
@@ -37,11 +38,11 @@ class AuthenticationService {
       return user;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
-        print('No user found for that email.');
+        debugPrint('No user found for that email.');
       } else if (e.code == 'wrong-password') {
-        print('Wrong password provided for that user.');
+        debugPrint('Wrong password provided for that user.');
       }
-      return null; // Handle other exceptions as needed
+      return null;
     }
   }
 
@@ -53,9 +54,9 @@ class AuthenticationService {
       return user;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'operation-not-allowed') {
-        print('Anonymous auth is disabled.');
+        debugPrint('Anonymous auth is disabled.');
       } else {
-        print(e.toString()); // Log other errors
+        debugPrint(e.toString());
       }
       return null;
     }

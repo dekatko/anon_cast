@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:workmanager/workmanager.dart';
 
@@ -26,7 +27,9 @@ class RotationScheduler {
   }
 
   /// Registers the periodic task (e.g. every 24 hours). Call from main.dart.
+  /// No-op on web (Workmanager is not supported).
   static Future<void> registerPeriodicTask() async {
+    if (kIsWeb) return;
     await Workmanager().initialize(
       callbackDispatcher,
       isInDebugMode: false,
@@ -40,6 +43,7 @@ class RotationScheduler {
 
   /// Returns true if a rotation check was requested by the background task.
   static Future<bool> isCheckRequested() async {
+    if (kIsWeb) return false;
     try {
       final dir = await getApplicationDocumentsDirectory();
       final file = File('${dir.path}/$flagFileName');
@@ -51,6 +55,7 @@ class RotationScheduler {
 
   /// Clears the rotation-check-requested flag (call after running rotation).
   static Future<void> clearCheckRequested() async {
+    if (kIsWeb) return;
     try {
       final dir = await getApplicationDocumentsDirectory();
       final file = File('${dir.path}/$flagFileName');

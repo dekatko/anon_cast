@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/admin_message.dart';
 import '../../provider/admin_messages_provider.dart';
-import '../../provider/firestore_provider.dart';
 import 'admin_message_detail_screen.dart';
 
 /// Admin dashboard: real-time list of anonymous messages with filters,
@@ -316,7 +315,7 @@ class _MessageCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: isUnread
-            ? BorderSide(color: theme.colorScheme.primary.withOpacity(0.5), width: 1)
+            ? BorderSide(color: theme.colorScheme.primary.withValues(alpha: 0.5), width: 1)
             : BorderSide.none,
       ),
       child: InkWell(

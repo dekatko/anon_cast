@@ -34,9 +34,7 @@ abstract interface class KeyManagerStorage {
 /// Adapter so [FlutterSecureStorage] can be used as [KeyManagerStorage].
 class SecureStorageAdapter implements KeyManagerStorage {
   SecureStorageAdapter([FlutterSecureStorage? storage])
-      : _storage = storage ?? const FlutterSecureStorage(
-          aOptions: AndroidOptions(encryptedSharedPreferences: true),
-        );
+      : _storage = storage ?? const FlutterSecureStorage();
 
   final FlutterSecureStorage _storage;
 
@@ -371,7 +369,9 @@ class KeyManager {
       return Uint8List.fromList(bytes.take(saltLengthBytes).toList());
     }
     final out = Uint8List(saltLengthBytes);
-    for (var i = 0; i < bytes.length; i++) out[i] = bytes[i];
+    for (var i = 0; i < bytes.length; i++) {
+      out[i] = bytes[i];
+    }
     return out;
   }
 }

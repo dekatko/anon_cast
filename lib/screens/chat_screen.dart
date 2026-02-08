@@ -11,7 +11,7 @@ import '../models/chat_session.dart';
 import '../provider/chat_session_provider.dart';
 import '../provider/firestore_provider.dart';
 import '../provider/user_provider.dart';
-import '../services/chat_service.dart';
+import '../services/auth_service.dart';
 import '../services/encryption_key_service.dart';
 
 final log = Logger();
@@ -27,10 +27,8 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   Box? _chatSessionBox;
-  Future<ChatSession?>? _loadSessionFuture;
   List<ChatMessage> messages = []; // List to store chat messages
   AsymmetricKeyPair<PublicKey, PrivateKey>? _myEphemeralKeyPair;
-  final ChatService _chatService = ChatService("placeholder"); // Assuming ChatService instance
   final EncryptionKeyService _keyService = EncryptionKeyService();
   final firestore = FirestoreProvider();
 
@@ -50,9 +48,19 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
 
+    final auth = context.read<AuthService>();
+    final isAnonymous = auth.currentUser?.isAnonymous ?? false;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Chat Room'),
+        actions: [
+          if (isAnonymous)
+            IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: () => auth.signOut(),
+            ),
+        ],
       ),
       body: FutureBuilder<ChatSession?>(
         future: _loadOrCreateChatSession(), // Replace with your actual method call
@@ -67,7 +75,10 @@ class _ChatScreenState extends State<ChatScreen> {
                     itemCount: session.messages.length, // Use messages from session
                     itemBuilder: (context, index) {
                       final message = session.messages[index];
-                      // return ChatMessageTile(message: message); // Widget for displaying messages
+                      return ListTile(
+                        title: Text(message.encryptedContent),
+                        subtitle: Text(message.timestamp),
+                      );
                     },
                   ),
                 ),
@@ -97,19 +108,15 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Future<void> _generateEphemeralKeyPair() async {
-    _myEphemeralKeyPair = await _keyService.generateEphemeralKeyPair();
-  }
-
   Future<ChatSession?> _loadOrCreateChatSession() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final chatSessionProvider = Provider.of<ChatSessionProvider>(context, listen: false);
     final chatSession = widget.chatSession;
 
     try {
-      final chatSessionId = chatSession?.id;
+      final chatSessionId = chatSession.id;
       final user = userProvider.getUserById(chatSession.studentId);
-      final sessionData = _chatSessionBox?.get(chatSession?.id);
+      final sessionData = _chatSessionBox?.get(chatSessionId);
 
       if (sessionData != null) {
         log.i("_loadOrCreateChatSession() - Loading existing ChatSession");
@@ -136,13 +143,13 @@ class _ChatScreenState extends State<ChatScreen> {
         } else {
           // Handle case where user is not logged in (optional)
           //Not necessarily needed, because anonymous users always login afresh
-          print('Error: User not logged in');
+          log.w('User not logged in');
           return null;
         }
       }
     } catch (error) {
       // Handle potential errors during session retrieval or creation (optional)
-      print('Error loading/creating chat session: $error');
+      log.e('Error loading/creating chat session: $error');
       return null;
     }
   }
@@ -178,7 +185,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
       _messageController.clear();
       // Refresh message list after sending (consider using a provider/bloc for updates)
-      _loadSessionFuture = _loadOrCreateChatSession(); // Reload session data
+      _loadOrCreateChatSession(); // Reload session data
       setState(() {}); // Trigger a rebuild to reflect changes
     }
   }

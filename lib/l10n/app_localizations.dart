@@ -104,6 +104,108 @@ class AppLocalizations {
   String get threadErrorSend =>
       _localizedValues[locale.languageCode]?['threadErrorSend'] ?? 'Failed to send message';
 
+  // ——— User management (access codes) ———
+  String get userManagementTitle =>
+      _localizedValues[locale.languageCode]?['userManagementTitle'] ?? 'Access codes';
+
+  String get generateNewCode =>
+      _localizedValues[locale.languageCode]?['generateNewCode'] ?? 'Generate new code';
+
+  String get expiryTime =>
+      _localizedValues[locale.languageCode]?['expiryTime'] ?? 'Expiry';
+
+  String get singleUse =>
+      _localizedValues[locale.languageCode]?['singleUse'] ?? 'Single use';
+
+  String get copyCode =>
+      _localizedValues[locale.languageCode]?['copyCode'] ?? 'Copy code';
+
+  String get codeCopied =>
+      _localizedValues[locale.languageCode]?['codeCopied'] ?? 'Code copied';
+
+  String get revokeCode =>
+      _localizedValues[locale.languageCode]?['revokeCode'] ?? 'Revoke';
+
+  String get deleteCode =>
+      _localizedValues[locale.languageCode]?['deleteCode'] ?? 'Delete';
+
+  String get revokeConfirm =>
+      _localizedValues[locale.languageCode]?['revokeConfirm'] ?? 'Revoke this code? It cannot be used again.';
+
+  String get deleteConfirm =>
+      _localizedValues[locale.languageCode]?['deleteConfirm'] ?? 'Permanently delete this code?';
+
+  String get cancel =>
+      _localizedValues[locale.languageCode]?['cancel'] ?? 'Cancel';
+
+  String get confirm =>
+      _localizedValues[locale.languageCode]?['confirm'] ?? 'Confirm';
+
+  String get activeUsers =>
+      _localizedValues[locale.languageCode]?['activeUsers'] ?? 'Active users';
+
+  String get totalAnonymousUsers =>
+      _localizedValues[locale.languageCode]?['totalAnonymousUsers'] ?? 'Anonymous users (total)';
+
+  String get messagesLast24h =>
+      _localizedValues[locale.languageCode]?['messagesLast24h'] ?? 'Messages (24h)';
+
+  String get messagesLast7d =>
+      _localizedValues[locale.languageCode]?['messagesLast7d'] ?? 'Messages (7d)';
+
+  String get exportCsv =>
+      _localizedValues[locale.languageCode]?['exportCsv'] ?? 'Export to CSV';
+
+  String get searchCodes =>
+      _localizedValues[locale.languageCode]?['searchCodes'] ?? 'Search codes…';
+
+  String get codeStatusActive =>
+      _localizedValues[locale.languageCode]?['codeStatusActive'] ?? 'Active';
+
+  String get codeStatusUsed =>
+      _localizedValues[locale.languageCode]?['codeStatusUsed'] ?? 'Used';
+
+  String get codeStatusExpired =>
+      _localizedValues[locale.languageCode]?['codeStatusExpired'] ?? 'Expired';
+
+  String get codeStatusRevoked =>
+      _localizedValues[locale.languageCode]?['codeStatusRevoked'] ?? 'Revoked';
+
+  String get showQr =>
+      _localizedValues[locale.languageCode]?['showQr'] ?? 'Show QR code';
+
+  String get days => _localizedValues[locale.languageCode]?['days'] ?? 'days';
+
+  String get noCodes =>
+      _localizedValues[locale.languageCode]?['noCodes'] ?? 'No codes yet. Generate one to get started.';
+
+  String get errorLoadingCodes =>
+      _localizedValues[locale.languageCode]?['errorLoadingCodes'] ?? 'Error loading codes';
+
+  String get errorGenerate =>
+      _localizedValues[locale.languageCode]?['errorGenerate'] ?? 'Failed to generate code';
+
+  // ——— Auth / Login ———
+  String get loginTitle => _localizedValues[locale.languageCode]?['loginTitle'] ?? 'Elly';
+  String get tabAdmin => _localizedValues[locale.languageCode]?['tabAdmin'] ?? 'Counselor';
+  String get tabAnonymous => _localizedValues[locale.languageCode]?['tabAnonymous'] ?? 'Anonymous';
+  String get email => _localizedValues[locale.languageCode]?['email'] ?? 'Email';
+  String get password => _localizedValues[locale.languageCode]?['password'] ?? 'Password';
+  String get accessCode => _localizedValues[locale.languageCode]?['accessCode'] ?? 'Access code';
+  String get login => _localizedValues[locale.languageCode]?['login'] ?? 'Log in';
+  String get forgotPassword => _localizedValues[locale.languageCode]?['forgotPassword'] ?? 'Forgot password?';
+  String get continueToChat => _localizedValues[locale.languageCode]?['continueToChat'] ?? 'Continue';
+  String get register => _localizedValues[locale.languageCode]?['register'] ?? 'Register';
+  String get administratorLogin => _localizedValues[locale.languageCode]?['administratorLogin'] ?? 'Counselor login';
+  String get administratorRegister => _localizedValues[locale.languageCode]?['administratorRegister'] ?? 'Counselor registration';
+
+  /// Resolve auth error message key to localized string.
+  String authErrorMessage(String messageKey) {
+    return _localizedValues[locale.languageCode]?[messageKey] ??
+        _localizedValues['en']?[messageKey] ??
+        messageKey;
+  }
+
   static const Map<String, Map<String, String>> _localizedValues = {
     'en': {
       'adminDashboardTitle': 'Messages',
@@ -138,6 +240,58 @@ class AppLocalizations {
       'messageFromAnonymous': 'Message from anonymous user',
       'messageFromYou': 'Your message',
       'threadErrorSend': 'Failed to send message',
+      'userManagementTitle': 'Access codes',
+      'generateNewCode': 'Generate new code',
+      'expiryTime': 'Expiry',
+      'singleUse': 'Single use',
+      'copyCode': 'Copy code',
+      'codeCopied': 'Code copied',
+      'revokeCode': 'Revoke',
+      'deleteCode': 'Delete',
+      'revokeConfirm': 'Revoke this code? It cannot be used again.',
+      'deleteConfirm': 'Permanently delete this code?',
+      'cancel': 'Cancel',
+      'confirm': 'Confirm',
+      'activeUsers': 'Active users',
+      'totalAnonymousUsers': 'Anonymous users (total)',
+      'messagesLast24h': 'Messages (24h)',
+      'messagesLast7d': 'Messages (7d)',
+      'exportCsv': 'Export to CSV',
+      'searchCodes': 'Search codes…',
+      'codeStatusActive': 'Active',
+      'codeStatusUsed': 'Used',
+      'codeStatusExpired': 'Expired',
+      'codeStatusRevoked': 'Revoked',
+      'showQr': 'Show QR code',
+      'days': 'days',
+      'noCodes': 'No codes yet. Generate one to get started.',
+      'errorLoadingCodes': 'Error loading codes',
+      'errorGenerate': 'Failed to generate code',
+      'loginTitle': 'Elly',
+      'tabAdmin': 'Counselor',
+      'tabAnonymous': 'Anonymous',
+      'email': 'Email',
+      'password': 'Password',
+      'accessCode': 'Access code',
+      'login': 'Log in',
+      'forgotPassword': 'Forgot password?',
+      'continueToChat': 'Continue',
+      'register': 'Register',
+      'administratorLogin': 'Counselor login',
+      'administratorRegister': 'Counselor registration',
+      'auth_error_email_required': 'Please enter your email.',
+      'auth_error_password_required': 'Please enter your password.',
+      'auth_error_code_required': 'Please enter your access code.',
+      'auth_error_code_invalid': 'Invalid or unknown access code.',
+      'auth_error_code_expired': 'This access code has expired.',
+      'auth_error_code_used': 'This code has already been used.',
+      'auth_error_code_revoked': 'This access code has been revoked.',
+      'auth_error_user_not_found': 'No account found for this email.',
+      'auth_error_wrong_password': 'Incorrect password.',
+      'auth_error_user_disabled': 'This account has been disabled.',
+      'auth_error_too_many_requests': 'Too many attempts. Please try again later.',
+      'auth_error_anonymous_disabled': 'Anonymous access is not available.',
+      'auth_error_unknown': 'Something went wrong. Please try again.',
     },
     'de': {
       'adminDashboardTitle': 'Nachrichten',
@@ -172,6 +326,58 @@ class AppLocalizations {
       'messageFromAnonymous': 'Nachricht von anonymem Nutzer',
       'messageFromYou': 'Deine Nachricht',
       'threadErrorSend': 'Nachricht konnte nicht gesendet werden',
+      'userManagementTitle': 'Zugangscodes',
+      'generateNewCode': 'Neuen Code erzeugen',
+      'expiryTime': 'Gültigkeit',
+      'singleUse': 'Einmalige Nutzung',
+      'copyCode': 'Code kopieren',
+      'codeCopied': 'Code kopiert',
+      'revokeCode': 'Widerrufen',
+      'deleteCode': 'Löschen',
+      'revokeConfirm': 'Diesen Code widerrufen? Er kann nicht mehr genutzt werden.',
+      'deleteConfirm': 'Diesen Code endgültig löschen?',
+      'cancel': 'Abbrechen',
+      'confirm': 'Bestätigen',
+      'activeUsers': 'Aktive Nutzer',
+      'totalAnonymousUsers': 'Anonyme Nutzer (gesamt)',
+      'messagesLast24h': 'Nachrichten (24h)',
+      'messagesLast7d': 'Nachrichten (7d)',
+      'exportCsv': 'Als CSV exportieren',
+      'searchCodes': 'Codes suchen…',
+      'codeStatusActive': 'Aktiv',
+      'codeStatusUsed': 'Benutzt',
+      'codeStatusExpired': 'Abgelaufen',
+      'codeStatusRevoked': 'Widerrufen',
+      'showQr': 'QR-Code anzeigen',
+      'days': 'Tage',
+      'noCodes': 'Noch keine Codes. Erzeuge einen zum Start.',
+      'errorLoadingCodes': 'Fehler beim Laden der Codes',
+      'errorGenerate': 'Code konnte nicht erzeugt werden',
+      'loginTitle': 'Elly',
+      'tabAdmin': 'Berater:in',
+      'tabAnonymous': 'Anonym',
+      'email': 'E-Mail',
+      'password': 'Passwort',
+      'accessCode': 'Zugangscode',
+      'login': 'Anmelden',
+      'forgotPassword': 'Passwort vergessen?',
+      'continueToChat': 'Weiter',
+      'register': 'Registrieren',
+      'administratorLogin': 'Berater:in-Anmeldung',
+      'administratorRegister': 'Berater:in-Registrierung',
+      'auth_error_email_required': 'Bitte E-Mail eingeben.',
+      'auth_error_password_required': 'Bitte Passwort eingeben.',
+      'auth_error_code_required': 'Bitte Zugangscode eingeben.',
+      'auth_error_code_invalid': 'Ungültiger oder unbekannter Zugangscode.',
+      'auth_error_code_expired': 'Dieser Zugangscode ist abgelaufen.',
+      'auth_error_code_used': 'Dieser Code wurde bereits verwendet.',
+      'auth_error_code_revoked': 'Dieser Zugangscode wurde widerrufen.',
+      'auth_error_user_not_found': 'Kein Konto für diese E-Mail gefunden.',
+      'auth_error_wrong_password': 'Falsches Passwort.',
+      'auth_error_user_disabled': 'Dieses Konto wurde deaktiviert.',
+      'auth_error_too_many_requests': 'Zu viele Versuche. Bitte später erneut versuchen.',
+      'auth_error_anonymous_disabled': 'Anonymer Zugang ist nicht verfügbar.',
+      'auth_error_unknown': 'Etwas ist schiefgelaufen. Bitte erneut versuchen.',
     },
   };
 }

@@ -4,9 +4,7 @@ import 'dart:typed_data';
 import 'package:pointycastle/export.dart';
 
 class EncryptionUtil {
-  static const String _algorithm =
-      'aes-256-cbc'; // Advanced Encryption Standard with 256-bit key and CBC mode
-  static const int _keyLength = 32; // Key length in bytes
+  static const int _keyLength = 32; // Key length in bytes (AES-256)
 
   /// Encrypts a string using a given key.
   ///

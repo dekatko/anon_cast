@@ -224,7 +224,7 @@ class _EncryptionIndicator extends StatelessWidget {
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -307,7 +307,7 @@ class _MessageInputState extends State<_MessageInput> {
         color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.shadow.withOpacity(0.08),
+            color: theme.colorScheme.shadow.withValues(alpha: 0.08),
             blurRadius: 8,
             offset: const Offset(0, -2),
           ),

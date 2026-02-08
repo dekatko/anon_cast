@@ -3,6 +3,7 @@ import 'package:hive/hive.dart';
 
 import '../models/chat_session.dart';
 import 'admin/admin_dashboard.dart';
+import 'admin/user_management_screen.dart';
 import 'admin_chat_dashboard_screen.dart';
 import 'admin_rotation_status_screen.dart';
 import 'admin_system_settings_screen.dart';
@@ -24,6 +25,7 @@ class _AdministratorDashboardScreenState
   Widget build(BuildContext context) {
     final screens = [
       const AdminDashboard(),
+      const UserManagementScreen(),
       const AdminRotationStatusScreen(),
       const AdministratorSystemSettingsScreen(),
     ];
@@ -41,6 +43,10 @@ class _AdministratorDashboardScreenState
           BottomNavigationBarItem(
             icon: Icon(Icons.inbox),
             label: 'Messages',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.people),
+            label: 'Users',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.security),

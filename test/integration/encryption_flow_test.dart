@@ -32,7 +32,9 @@ class EncryptedMessageFlow {
   static Uint8List testIvGenerator() {
     final b = Uint8List(16);
     final r = Random.secure();
-    for (var i = 0; i < 16; i++) b[i] = r.nextInt(256);
+    for (var i = 0; i < 16; i++) {
+      b[i] = r.nextInt(256);
+    }
     return b;
   }
 

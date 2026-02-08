@@ -29,11 +29,11 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'YOUR_ANDROID_API_KEY',
-    appId: 'YOUR_ANDROID_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
+    apiKey: 'AIzaSyCDoRg0x25w9Oghn3lO914Tk3r7mgUdCaU',
+    appId: '1:479218484040:android:ba1e8c4f1783de65e2e97d',
+    messagingSenderId: '479218484040',
     projectId: 'anon-cast',
-    storageBucket: 'YOUR_PROJECT_ID.appspot.com',
+    storageBucket: 'anon-cast.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
@@ -46,12 +46,11 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'YOUR_WEB_API_KEY',
-    appId: 'YOUR_WEB_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    projectId: 'anon-cast',
-    authDomain: 'YOUR_PROJECT_ID.firebaseapp.com',
-    storageBucket: 'YOUR_PROJECT_ID.appspot.com',
-    measurementId: 'G-XXXXXXXXXX',
-  );
+      apiKey: "AIzaSyBe3GVz9C7pnPFUNR-lSFe2Vka4LvDD0Ag",
+      authDomain: "anon-cast.firebaseapp.com",
+      projectId: "anon-cast",
+      storageBucket: "anon-cast.firebasestorage.app",
+      messagingSenderId: "479218484040",
+      appId: "1:479218484040:web:96c6f26713722a5fe2e97d",
+      measurementId: "G-QT9VEJS06R");
 }

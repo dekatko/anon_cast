@@ -4,10 +4,14 @@ import 'package:anon_cast/models/chat_session.dart';
 import 'package:anon_cast/provider/admin_messages_provider.dart';
 import 'package:anon_cast/provider/chat_session_provider.dart';
 import 'package:anon_cast/provider/firestore_provider.dart';
-import 'package:anon_cast/screens/login_screen.dart';
+import 'package:anon_cast/screens/admin_dashboard_screen.dart';
+import 'package:anon_cast/screens/auth/anonymous_home_screen.dart';
+import 'package:anon_cast/screens/auth/login_screen.dart';
+import 'package:anon_cast/services/auth_service.dart';
 import 'package:anon_cast/services/chat_service.dart';
 import 'package:anon_cast/services/rotation_scheduler.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_flutter/adapters.dart';
@@ -43,8 +47,11 @@ void main() async {
   await Hive.openBox<User>('users');
   await Hive.openBox<ChatSession>('chat_sessions');
 
-  Workmanager().initialize(RotationScheduler.callbackDispatcher);
-  await RotationScheduler.registerPeriodicTask();
+  // Workmanager uses native APIs (e.g. getCallbackHandle) not available on web.
+  if (!kIsWeb) {
+    Workmanager().initialize(RotationScheduler.callbackDispatcher);
+    await RotationScheduler.registerPeriodicTask();
+  }
 
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -56,9 +63,9 @@ void main() async {
   final chatService = ChatService('');
 
   runApp(
-    // Wrap your app with MultiProvider
     MultiProvider(
       providers: [
+        Provider<AuthService>(create: (_) => AuthService()),
         ChangeNotifierProvider<FirestoreProvider>.value(
           value: firestoreProvider,
         ),
@@ -79,12 +86,23 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const LoginScreen(),
+      home: StreamBuilder(
+        stream: context.read<AuthService>().authStateChanges,
+        builder: (context, snapshot) {
+          final user = snapshot.data;
+          if (user == null) {
+            return const LoginScreen();
+          }
+          if (user.isAnonymous) {
+            return const AnonymousHomeScreen();
+          }
+          return const AdministratorDashboardScreen();
+        },
+      ),
       localizationsDelegates: [
         const AppLocalizationsDelegate(),
         GlobalMaterialLocalizations.delegate,
