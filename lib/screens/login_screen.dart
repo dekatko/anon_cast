@@ -78,7 +78,9 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 20.0),
               Text(
-                _errorMessage.isNotEmpty ? _errorMessage : '', // Display login error message (if any)
+                _errorMessage.isNotEmpty
+                    ? _errorMessage
+                    : '', // Display login error message (if any)
                 style: const TextStyle(color: Colors.red, fontSize: 12.0),
               ),
               TextButton(
@@ -119,12 +121,11 @@ class _LoginScreenState extends State<LoginScreen> {
     var adminCode = _adminCodeController.text;
     log.i("_loginAnonymousUser() - uid: $uid, adminCode: $adminCode");
 
-    if(adminCode.isEmpty) {
+    if (adminCode.isEmpty) {
       log.i("No Admin Code Entered!");
       setState(() {
         _errorMessage = "Please enter an Admin Code";
       });
-
     } else if (uid != null) {
       setState(() {
         _errorMessage = '';
@@ -132,7 +133,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
       _setOrCreateHiveUserInProvider(context, uid);
       // Check for existing chat session (if user and adminCode are present, returns null if adminCode does not exist)
-      final existingChat = await chatService.getExistingOrNewChat(uid!, adminCode);
+      final existingChat =
+          await chatService.getExistingOrNewChat(uid!, adminCode);
 
       if (existingChat != null) {
         log.i("Existing chat found, joining...");
@@ -159,7 +161,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final existingUser = userBox.get(uid);
     if (existingUser == null) {
       final anonymousUser = User(
-        id: uid!,
+        id: uid,
         name: 'Anonymous',
         role: UserRole.student,
       );

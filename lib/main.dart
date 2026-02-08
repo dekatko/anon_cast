@@ -3,10 +3,12 @@ import 'package:anon_cast/provider/chat_session_provider.dart';
 import 'package:anon_cast/provider/firestore_provider.dart';
 import 'package:anon_cast/screens/login_screen.dart';
 import 'package:anon_cast/services/chat_service.dart';
+import 'package:anon_cast/services/rotation_scheduler.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
+import 'package:workmanager/workmanager.dart';
 
 import 'firebase_options.dart';
 import 'models/chat_message.dart';
@@ -36,6 +38,9 @@ void main() async {
 
   await Hive.openBox<User>('users');
   await Hive.openBox<ChatSession>('chat_sessions');
+
+  Workmanager().initialize(RotationScheduler.callbackDispatcher);
+  await RotationScheduler.registerPeriodicTask();
 
   WidgetsFlutterBinding.ensureInitialized();
 

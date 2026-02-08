@@ -73,6 +73,47 @@ class EncryptionUtil {
     return utf8.decode(decryptedBytes);
   }
 
+  /// Encrypts [data] with raw [keyBytes] (32 bytes) and [iv] (16 bytes).
+  /// Returns base64-encoded ciphertext. Use for key rotation when key is Uint8List.
+  static String encryptWithKeyBytes(
+      String data, Uint8List keyBytes, Uint8List iv) {
+    if (keyBytes.length != _keyLength) {
+      throw ArgumentError(
+          'Key must be $_keyLength bytes, got ${keyBytes.length}.');
+    }
+    if (iv.length != 16) {
+      throw ArgumentError('IV must be 16 bytes long.');
+    }
+    final blockCipher = CBCBlockCipher(AESEngine());
+    final params = ParametersWithIV(KeyParameter(keyBytes), iv);
+    blockCipher.init(true, params);
+    final paddedBlockCipher =
+        PaddedBlockCipherImpl(PKCS7Padding(), blockCipher);
+    final encryptedBytes =
+        paddedBlockCipher.process(Uint8List.fromList(utf8.encode(data)));
+    return base64Encode(encryptedBytes);
+  }
+
+  /// Decrypts [encryptedData] (base64) with raw [keyBytes] and [iv].
+  static String decryptWithKeyBytes(
+      String encryptedData, Uint8List keyBytes, Uint8List iv) {
+    if (keyBytes.length != _keyLength) {
+      throw ArgumentError(
+          'Key must be $_keyLength bytes, got ${keyBytes.length}.');
+    }
+    if (iv.length != 16) {
+      throw ArgumentError('IV must be 16 bytes long.');
+    }
+    final encryptedBytes = Uint8List.fromList(base64Decode(encryptedData));
+    final blockCipher = CBCBlockCipher(AESEngine());
+    final params = ParametersWithIV(KeyParameter(keyBytes), iv);
+    blockCipher.init(false, params);
+    final paddedBlockCipher =
+        PaddedBlockCipherImpl(PKCS7Padding(), blockCipher);
+    final decryptedBytes = paddedBlockCipher.process(encryptedBytes);
+    return utf8.decode(decryptedBytes);
+  }
+
   /// Generates a random byte array of the specified length.
   static Uint8List generateRandomBytes(int length) {
     final secureRandom = SecureRandom();

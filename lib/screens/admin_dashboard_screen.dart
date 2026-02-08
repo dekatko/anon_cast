@@ -2,47 +2,53 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 import '../models/chat_session.dart';
-import '../screens/admin_chat_dashboard_screen.dart'; // Import Chat Dashboard Screen
-import '../screens/admin_system_settings_screen.dart'; // Import Settings Screen (replace with actual class name)
+import '../screens/admin_chat_dashboard_screen.dart';
+import '../screens/admin_rotation_status_screen.dart';
+import '../screens/admin_system_settings_screen.dart';
 
 class AdministratorDashboardScreen extends StatefulWidget {
   const AdministratorDashboardScreen({super.key});
 
   @override
-  _AdministratorDashboardScreenState createState() => _AdministratorDashboardScreenState();
+  State<AdministratorDashboardScreen> createState() =>
+      _AdministratorDashboardScreenState();
 }
 
-class _AdministratorDashboardScreenState extends State<AdministratorDashboardScreen> {
-  final _chatBox = Hive.box<ChatSession>('chat_sessions'); // Replace 'chats' with your actual box name
-  int _currentIndex = 0; // Index for current navigation bar item
+class _AdministratorDashboardScreenState
+    extends State<AdministratorDashboardScreen> {
+  final _chatBox = Hive.box<ChatSession>('chat_sessions');
+  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     final screens = [
-      const AdministratorChatDashboardScreen(), // Add your chat dashboard screen
-      const AdministratorSystemSettingsScreen(), // Add your system settings screen
-      // Add more screens as needed
+      const AdministratorChatDashboardScreen(),
+      const AdminRotationStatusScreen(),
+      const AdministratorSystemSettingsScreen(),
     ];
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Administrator Dashboard'),
       ),
-      body: screens[_currentIndex], // Display current navigation bar screen
+      body: screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed, // Fixed icons at the bottom
-        currentIndex: _currentIndex, // Set current index
-        onTap: (index) => setState(() => _currentIndex = index), // Update index on tap
+        type: BottomNavigationBarType.fixed,
+        currentIndex: _currentIndex,
+        onTap: (index) => setState(() => _currentIndex = index),
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.chat),
             label: 'Chats',
           ),
           BottomNavigationBarItem(
+            icon: Icon(Icons.security),
+            label: 'Rotation',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.settings),
             label: 'Settings',
           ),
-          // Add more items for additional screens
         ],
       ),
     );

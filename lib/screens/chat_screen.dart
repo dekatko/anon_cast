@@ -102,7 +102,8 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<ChatSession?> _loadOrCreateChatSession() async {
-    final userProvider = Provider.of<UserProvider>(context);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final chatSessionProvider = Provider.of<ChatSessionProvider>(context, listen: false);
     final chatSession = widget.chatSession;
 
     try {
