@@ -8,10 +8,12 @@ import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/message.dart';
+import '../models/pending_message.dart';
 import 'encryption_service.dart';
 import 'local_storage_service.dart';
 import 'message_relay.dart';
 import 'message_storage_interface.dart';
+import 'offline_queue_service.dart';
 
 /// Thrown when message send/receive or key operations fail.
 class MessageServiceException implements Exception {
@@ -46,6 +48,7 @@ class MessageService {
     MessageRelay? relay,
     EncryptionService? encryptionService,
     MessageServiceStorage? storage,
+    OfflineQueueService? offlineQueue,
     Logger? logger,
     /// Test override: when non-null, used instead of [auth?.currentUser] for send.
     String? testUserId,
@@ -56,6 +59,7 @@ class MessageService {
         _auth = auth,
         _encryption = encryptionService ?? EncryptionService(),
         _storage = storage ?? LocalStorageService.instance,
+        _offlineQueue = offlineQueue,
         _log = logger ?? Logger(),
         _testUserId = testUserId,
         _testUserIsAnonymous = testUserIsAnonymous,
@@ -65,6 +69,7 @@ class MessageService {
   final FirebaseAuth? _auth;
   final EncryptionService _encryption;
   final MessageServiceStorage _storage;
+  final OfflineQueueService? _offlineQueue;
   final Logger _log;
   final String? _testUserId;
   final bool? _testUserIsAnonymous;
@@ -166,7 +171,8 @@ class MessageService {
     final online = await _isOnline();
     if (!online) {
       final localId = const Uuid().v4();
-      final pendingMessage = Message(
+      final preview = content.length > 100 ? '${content.substring(0, 100)}…' : content;
+      final message = Message(
         id: localId,
         conversationId: conversationId,
         senderId: senderId,
@@ -175,11 +181,24 @@ class MessageService {
         timestamp: now,
         status: MessageStatus.unread,
         iv: _ivToList(encrypted.iv),
-        preview: content.length > 100 ? '${content.substring(0, 100)}…' : content,
+        preview: preview,
         senderType: senderType,
       );
-      await _storage.storeMessage(pendingMessage);
+      await _storage.storeMessage(message);
       await _addPending(conversationId, localId);
+      if (_offlineQueue != null) {
+        final pending = PendingMessage(
+          id: localId,
+          conversationId: conversationId,
+          encryptedContent: encrypted.encryptedContent,
+          iv: _ivToList(encrypted.iv),
+          timestamp: now,
+          senderId: senderId,
+          senderType: senderType,
+          preview: preview,
+        );
+        await _offlineQueue!.queueMessage(pending);
+      }
       _log.d('MessageService: queued offline message $localId');
       return localId;
     }
@@ -216,6 +235,7 @@ class MessageService {
         _log.w('MessageService: Firestore send attempt ${attempt + 1} failed', error: e);
         if (attempt == _maxRetries - 1) {
           final localId = const Uuid().v4();
+          final preview = content.length > 100 ? '${content.substring(0, 100)}…' : content;
           final pendingMessage = Message(
             id: localId,
             conversationId: conversationId,
@@ -225,11 +245,24 @@ class MessageService {
             timestamp: now,
             status: MessageStatus.unread,
             iv: _ivToList(encrypted.iv),
-            preview: content.length > 100 ? '${content.substring(0, 100)}…' : content,
+            preview: preview,
             senderType: senderType,
           );
           await _storage.storeMessage(pendingMessage);
           await _addPending(conversationId, localId);
+          if (_offlineQueue != null) {
+            final pending = PendingMessage(
+              id: localId,
+              conversationId: conversationId,
+              encryptedContent: encrypted.encryptedContent,
+              iv: _ivToList(encrypted.iv),
+              timestamp: now,
+              senderId: senderId,
+              senderType: senderType,
+              preview: preview,
+            );
+            await _offlineQueue!.queueMessage(pending);
+          }
           _log.d('MessageService: queued after failure: $localId');
           return localId;
         }
@@ -323,6 +356,13 @@ class MessageService {
       _log.e('MessageService: getOfflineMessages failed', error: e, stackTrace: st);
       rethrow;
     }
+  }
+
+  /// Returns pending queue entries for [conversationId] (for UI: "Sending...", "Failed ⚠️").
+  /// Empty if [OfflineQueueService] is not set.
+  List<PendingMessage> getPendingQueueMessages(String conversationId) {
+    if (conversationId.isEmpty) return [];
+    return _offlineQueue?.getPendingMessages(conversationId) ?? [];
   }
 
   /// Deletes message from Firestore and Hive. Removes from pending if present.

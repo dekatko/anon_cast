@@ -10,6 +10,10 @@ abstract interface class MessageServiceStorage {
   Future<String?> getConversationKey(String conversationId);
   Future<void> deleteMessage(String messageId);
   Future<void> deleteConversation(String conversationId);
+  /// Replaces local message id with server id after successful sync. Use when a queued message is sent.
+  Future<void> updateMessageId(String oldId, String newId);
+  /// Removes a message id from the MessageService pending list for [conversationId].
+  Future<void> removePendingMessageId(String conversationId, String messageId);
   Future<String?> getUserPref(String key);
   Future<void> setUserPref(String key, String value);
 }

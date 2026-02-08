@@ -45,6 +45,15 @@ class InMemoryMessageStorage implements MessageServiceStorage {
   }
 
   @override
+  Future<void> updateMessageId(String oldId, String newId) async {
+    final m = _messages.remove(oldId);
+    if (m != null) _messages[newId] = m.copyWith(id: newId);
+  }
+
+  @override
+  Future<void> removePendingMessageId(String conversationId, String messageId) async {}
+
+  @override
   Future<String?> getUserPref(String key) async => _userPrefs[key];
 
   @override

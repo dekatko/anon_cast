@@ -220,6 +220,12 @@ class _ThrowingStorage implements MessageServiceStorage {
   Future<void> deleteConversation(String conversationId) async {}
 
   @override
+  Future<void> updateMessageId(String oldId, String newId) async {}
+
+  @override
+  Future<void> removePendingMessageId(String conversationId, String messageId) async {}
+
+  @override
   Future<String?> getUserPref(String key) async => null;
 
   @override

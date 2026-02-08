@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:logger/logger.dart';
@@ -5,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../models/conversation_key.dart';
 import '../models/message.dart';
+import '../models/pending_message.dart';
 import 'message_storage_interface.dart';
 
 /// Box names for local storage. Data is stored in app documents directory
@@ -17,6 +20,7 @@ class LocalStorageService implements MessageServiceStorage {
   static const String _boxMessages = 'messages';
   static const String _boxConversationKeys = 'conversation_keys';
   static const String _boxUserPrefs = 'user_prefs';
+  static const String _pendingPrefPrefix = 'message_service_pending_';
 
   final Logger _log;
   bool _initialized = false;
@@ -59,6 +63,9 @@ class LocalStorageService implements MessageServiceStorage {
     }
     if (!Hive.isAdapterRegistered(7)) {
       Hive.registerAdapter(ConversationKeyAdapter());
+    }
+    if (!Hive.isAdapterRegistered(8)) {
+      Hive.registerAdapter(PendingMessageAdapter());
     }
   }
 
@@ -167,7 +174,9 @@ class LocalStorageService implements MessageServiceStorage {
     }
   }
 
-  /// Privacy: wipes all local data (messages, keys, user_prefs). Call on logout.
+  static const String _boxPendingMessages = 'pending_messages';
+
+  /// Privacy: wipes all local data (messages, keys, user_prefs, pending_messages). Call on logout.
   /// Boxes are cleared and closed; they will be reopened on next [init] or access.
   Future<void> clearAllData() async {
     if (!_initialized) return;
@@ -175,6 +184,16 @@ class LocalStorageService implements MessageServiceStorage {
       await _messages.clear();
       await _conversationKeys.clear();
       await _userPrefs.clear();
+      try {
+        if (!Hive.isBoxOpen(_boxPendingMessages)) {
+          await Hive.openBox<PendingMessage>(_boxPendingMessages);
+        }
+        final pendingBox = Hive.box<PendingMessage>(_boxPendingMessages);
+        await pendingBox.clear();
+        await pendingBox.close();
+      } catch (e) {
+        _log.w('LocalStorageService: clear pending_messages failed', error: e);
+      }
       await _messages.close();
       await _conversationKeys.close();
       await _userPrefs.close();
@@ -186,6 +205,39 @@ class LocalStorageService implements MessageServiceStorage {
     } catch (e, st) {
       _log.e('LocalStorageService: clearAllData failed', error: e, stackTrace: st);
       rethrow;
+    }
+  }
+
+  /// Replaces local message id with server id (e.g. after offline queue sync).
+  Future<void> updateMessageId(String oldId, String newId) async {
+    if (!_initialized) await init();
+    if (oldId.isEmpty || newId.isEmpty) return;
+    try {
+      final existing = _messages.get(oldId);
+      if (existing == null) return;
+      final updated = existing.copyWith(id: newId);
+      await _messages.delete(oldId);
+      await _messages.put(newId, updated);
+      await removePendingMessageId(existing.conversationId, oldId);
+      _log.d('LocalStorageService: updated message id $oldId -> $newId');
+    } catch (e, st) {
+      _log.e('LocalStorageService: updateMessageId failed', error: e, stackTrace: st);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> removePendingMessageId(String conversationId, String messageId) async {
+    if (!_initialized) await init();
+    final key = '$_pendingPrefPrefix$conversationId';
+    final json = await getUserPref(key);
+    if (json == null || json.isEmpty) return;
+    try {
+      final list = List<String>.from(jsonDecode(json) as List<dynamic>);
+      list.remove(messageId);
+      await setUserPref(key, list.isEmpty ? '' : jsonEncode(list));
+    } catch (e, st) {
+      _log.e('LocalStorageService: removePendingMessageId failed', error: e, stackTrace: st);
     }
   }
 
