@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
+import 'local_storage_service.dart';
+
 class AuthenticationService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -65,6 +67,7 @@ class AuthenticationService {
   // Sign out the current user
   Future<void> signOut() async {
     await _auth.signOut();
+    await LocalStorageService.instance.clearAllData();
   }
 
   // Check if a user is currently signed in

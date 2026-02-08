@@ -11,6 +11,7 @@ import 'package:anon_cast/services/auth_service.dart';
 import 'package:anon_cast/services/chat_service.dart';
 import 'package:anon_cast/database/app_database.dart';
 import 'package:anon_cast/provider/offline_provider.dart';
+import 'package:anon_cast/services/local_storage_service.dart';
 import 'package:anon_cast/services/message_cache.dart';
 import 'package:anon_cast/services/rotation_scheduler.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -36,21 +37,16 @@ void main() async {
 
   // Initialize Firebase
   await Firebase.initializeApp(
-    // Replace with actual values
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Initialize hive
-  await Hive.initFlutter();
-  //await Hive.deleteFromDisk();
-  // Registering the adapter
+  // Initialize Hive via LocalStorageService (path_provider; messages, keys, user_prefs)
+  await LocalStorageService.instance.init();
+  // Other Hive adapters and boxes (existing app)
   Hive.registerAdapter(ChatMessageAdapter());
   Hive.registerAdapter(UserAdapter());
   Hive.registerAdapter(UserRoleAdapter());
   Hive.registerAdapter(ChatSessionAdapter());
-  Hive.registerAdapter(MessageAdapter());
-  Hive.registerAdapter(ConversationKeyAdapter());
-
   await Hive.openBox<User>('users');
   await Hive.openBox<ChatSession>('chat_sessions');
   await MessageCache.instance.init();

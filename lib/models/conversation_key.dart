@@ -1,9 +1,12 @@
 import 'package:hive/hive.dart';
 
+part 'conversation_key.g.dart';
+
 /// Per-conversation encryption key for zero-knowledge E2E.
 ///
 /// Stored **only in Hive** on device; never sent to Firestore.
 /// [key] is the AES key, base64-encoded for storage.
+@HiveType(typeId: 7)
 class ConversationKey {
   const ConversationKey({
     required this.id,
@@ -12,13 +15,13 @@ class ConversationKey {
     DateTime? lastRotated,
   }) : lastRotated = lastRotated ?? createdAt;
 
-  /// Conversation id this key belongs to.
+  @HiveField(0)
   final String id;
-  /// Base64-encoded AES key (never leave the device).
+  @HiveField(1)
   final String key;
-  /// When this key was created.
+  @HiveField(2)
   final DateTime createdAt;
-  /// When the key was last rotated (defaults to [createdAt]).
+  @HiveField(3)
   final DateTime lastRotated;
 
   /// From local/Hive map.
@@ -63,50 +66,4 @@ class ConversationKey {
       lastRotated: lastRotated ?? this.lastRotated,
     );
   }
-}
-
-/// Hive TypeAdapter for [ConversationKey].
-class ConversationKeyAdapter extends TypeAdapter<ConversationKey> {
-  @override
-  final int typeId = 7;
-
-  @override
-  ConversationKey read(BinaryReader reader) {
-    final numOfFields = reader.readByte();
-    final fields = <int, dynamic>{
-      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
-    };
-    final created = fields[2] as int? ?? 0;
-    final rotated = fields[3] as int? ?? created;
-    return ConversationKey(
-      id: fields[0] as String? ?? '',
-      key: fields[1] as String? ?? '',
-      createdAt: DateTime.fromMillisecondsSinceEpoch(created),
-      lastRotated: DateTime.fromMillisecondsSinceEpoch(rotated),
-    );
-  }
-
-  @override
-  void write(BinaryWriter writer, ConversationKey obj) {
-    writer
-      ..writeByte(4)
-      ..writeByte(0)
-      ..write(obj.id)
-      ..writeByte(1)
-      ..write(obj.key)
-      ..writeByte(2)
-      ..write(obj.createdAt.millisecondsSinceEpoch)
-      ..writeByte(3)
-      ..write(obj.lastRotated.millisecondsSinceEpoch);
-  }
-
-  @override
-  int get hashCode => typeId.hashCode;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ConversationKeyAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
 }

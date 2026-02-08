@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'local_storage_service.dart';
+
 /// Result of successful anonymous sign-in. Contains Firebase user and admin id
 /// for resolving the chat session.
 class AnonymousAuthResult {
@@ -74,6 +76,8 @@ class AuthService {
 
   Future<void> signOut() async {
     await _auth.signOut();
+    // Privacy: wipe decrypted messages and keys from local storage
+    await LocalStorageService.instance.clearAllData();
   }
 
   /// Send password reset email. Throws [AuthException] on failure.
