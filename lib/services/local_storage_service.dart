@@ -174,6 +174,24 @@ class LocalStorageService implements MessageServiceStorage {
     }
   }
 
+  /// Returns all conversation keys (id -> base64 key). Used for key export/backup.
+  Future<Map<String, String>> getAllConversationKeys() async {
+    if (!_initialized) await init();
+    try {
+      final map = <String, String>{};
+      for (final key in _conversationKeys.keys) {
+        final ck = _conversationKeys.get(key);
+        if (ck != null && ck.key.isNotEmpty) {
+          map[ck.id] = ck.key;
+        }
+      }
+      return map;
+    } catch (e, st) {
+      _log.e('LocalStorageService: getAllConversationKeys failed', error: e, stackTrace: st);
+      rethrow;
+    }
+  }
+
   static const String _boxPendingMessages = 'pending_messages';
 
   /// Privacy: wipes all local data (messages, keys, user_prefs, pending_messages). Call on logout.
