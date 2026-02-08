@@ -106,6 +106,9 @@ class AdminMessage {
     );
   }
 
+  /// Serializes for Firestore (uses [Timestamp] for timestamp).
+  Map<String, dynamic> toFirestore() => toMap();
+
   Map<String, dynamic> toMap() {
     return {
       'conversationId': conversationId,

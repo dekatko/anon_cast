@@ -1,0 +1,103 @@
+rules_version = '2';
+
+// AnonCast Firestore Security Rules
+// - Admins (email auth) access only their organization's data.
+// - Anonymous users read/write only their own messages and related conversations.
+// - Code verification: use a Cloud Function for production; see comment below.
+
+function isSignedIn() {
+  return request.auth != null;
+}
+
+function isEmailUser() {
+  return isSignedIn() && request.auth.token.firebase.sign_in_provider != 'anonymous';
+}
+
+function userOrgId(db) {
+  let userDoc = get(/databases/$(db)/documents/users/$(request.auth.uid));
+  return userDoc != null && userDoc.data != null ? userDoc.data.get('organizationId', '') : '';
+}
+
+function userBelongsToOrg(orgId, db) {
+  return isEmailUser() && userOrgId(db) == orgId;
+}
+
+function conversationParticipant(convId, db) {
+  return convId != '' &&
+    exists(/databases/$(db)/documents/conversations/$(convId)) &&
+    (
+      get(/databases/$(db)/documents/conversations/$(convId)).data.get('adminId', '') == request.auth.uid ||
+      get(/databases/$(db)/documents/conversations/$(convId)).data.get('anonymousUserId', '') == request.auth.uid
+    );
+}
+
+function conversationAdmin(convId, db) {
+  return convId != '' &&
+    exists(/databases/$(db)/documents/conversations/$(convId)) &&
+    get(/databases/$(db)/documents/conversations/$(convId)).data.get('adminId', '') == request.auth.uid;
+}
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- organizations ----------
+    // Admins can read their own organization only.
+    match /organizations/{orgId} {
+      allow read: if isEmailUser() && userOrgId(database) == orgId;
+      allow create, update, delete: if false; // Use Admin SDK or Cloud Function
+    }
+
+    // ---------- users (admin accounts) ----------
+    // Admins can read their own doc; read same-org users for listing.
+    match /users/{userId} {
+      allow read: if isEmailUser() && (request.auth.uid == userId || userBelongsToOrg(resource.data.get('organizationId', ''), database));
+      allow create: if isEmailUser() && request.auth.uid == userId;
+      allow update, delete: if isEmailUser() && request.auth.uid == userId;
+    }
+
+    // ---------- access_codes ----------
+    // Admins can read/write codes for their org (or created by them).
+    // Anonymous code verification: in production, use a Cloud Function to validate
+    // the code and return a token/session; do not allow anonymous client to query
+    // access_codes by code. For development only, you can temporarily allow
+    // list for authenticated users (removes anonymous code login from client).
+    match /access_codes/{codeId} {
+      allow read: if isEmailUser() && (
+        resource.data.get('organizationId', '') == userOrgId(database) ||
+        resource.data.get('createdByAdminId', '') == request.auth.uid
+      );
+      allow create: if isEmailUser();
+      allow update, delete: if isEmailUser() && (
+        resource.data.get('createdByAdminId', '') == request.auth.uid ||
+        resource.data.get('organizationId', '') == userOrgId(database)
+      );
+    }
+
+    // ---------- conversations ----------
+    // Participants (admin or anonymous) can read/write their conversations.
+    match /conversations/{convId} {
+      allow read, update, delete: if isSignedIn() && (
+        resource.data.get('adminId', '') == request.auth.uid ||
+        resource.data.get('anonymousUserId', '') == request.auth.uid
+      );
+      allow create: if isSignedIn() && (
+        request.resource.data.get('adminId', '') == request.auth.uid ||
+        request.resource.data.get('anonymousUserId', '') == request.auth.uid
+      );
+    }
+
+    // ---------- messages ----------
+    // Only participants of the conversation can read; only sender can create (with validation).
+    match /messages/{messageId} {
+      allow read: if isSignedIn() && conversationParticipant(resource.data.get('conversationId', ''), database);
+      allow create: if isSignedIn() &&
+        request.resource.data.get('senderId', '') == request.auth.uid &&
+        request.resource.data.get('timestamp', null) is timestamp &&
+        conversationParticipant(request.resource.data.get('conversationId', ''), database);
+      allow update, delete: if isSignedIn() && (
+        resource.data.get('senderId', '') == request.auth.uid ||
+        conversationAdmin(resource.data.get('conversationId', ''), database)
+      );
+    }
+  }
+}

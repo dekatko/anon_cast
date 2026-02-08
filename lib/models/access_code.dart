@@ -37,6 +37,7 @@ extension AccessCodeStatusX on AccessCodeStatus {
 }
 
 /// Represents an access code document in Firestore collection 'access_codes'.
+/// Optionally scoped to an [organizationId] for multi-tenant rules.
 class AccessCode {
   const AccessCode({
     required this.id,
@@ -49,6 +50,7 @@ class AccessCode {
     this.revokedAt,
     this.createdByAdminId,
     this.usedByUserId,
+    this.organizationId,
   });
 
   final String id;
@@ -61,6 +63,8 @@ class AccessCode {
   final DateTime? revokedAt;
   final String? createdByAdminId;
   final String? usedByUserId;
+  /// Optional. When set, security rules can restrict access by organization.
+  final String? organizationId;
 
   bool get isActive => status == AccessCodeStatus.active;
   bool get isExpired =>
@@ -86,8 +90,12 @@ class AccessCode {
       revokedAt: data['revokedAt'] != null ? ts(data['revokedAt']) : null,
       createdByAdminId: data['createdByAdminId'] as String?,
       usedByUserId: data['usedByUserId'] as String?,
+      organizationId: data['organizationId'] as String?,
     );
   }
+
+  /// Serializes to a map for Firestore (uses [Timestamp] for dates).
+  Map<String, dynamic> toFirestore() => toMap();
 
   Map<String, dynamic> toMap() {
     return {
@@ -100,6 +108,7 @@ class AccessCode {
       if (revokedAt != null) 'revokedAt': Timestamp.fromDate(revokedAt!),
       if (createdByAdminId != null) 'createdByAdminId': createdByAdminId,
       if (usedByUserId != null) 'usedByUserId': usedByUserId,
+      if (organizationId != null) 'organizationId': organizationId,
     };
   }
 }
