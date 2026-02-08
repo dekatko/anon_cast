@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:provider/provider.dart';
 
 import '../models/chat_session.dart';
+import '../provider/offline_provider.dart';
+import '../widgets/offline_banner.dart';
 import 'admin/admin_dashboard.dart';
 import 'admin/user_management_screen.dart';
 import 'admin_chat_dashboard_screen.dart';
@@ -34,7 +37,23 @@ class _AdministratorDashboardScreenState
       appBar: AppBar(
         title: const Text('Administrator Dashboard'),
       ),
-      body: screens[_currentIndex],
+      body: Column(
+        children: [
+          Consumer<OfflineProvider?>(
+            builder: (context, offline, _) {
+              if (offline == null) return const SizedBox.shrink();
+              return OfflineBanner(
+                isOffline: offline.isOffline,
+                isSyncing: offline.isSyncing,
+                pendingCount: offline.pendingCount,
+                failedCount: offline.failedCount,
+                onRetry: offline.failedCount > 0 ? offline.retryAllFailed : null,
+              );
+            },
+          ),
+          Expanded(child: screens[_currentIndex]),
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,

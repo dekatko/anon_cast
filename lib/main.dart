@@ -9,6 +9,8 @@ import 'package:anon_cast/screens/auth/anonymous_home_screen.dart';
 import 'package:anon_cast/screens/auth/login_screen.dart';
 import 'package:anon_cast/services/auth_service.dart';
 import 'package:anon_cast/services/chat_service.dart';
+import 'package:anon_cast/database/app_database.dart';
+import 'package:anon_cast/provider/offline_provider.dart';
 import 'package:anon_cast/services/message_cache.dart';
 import 'package:anon_cast/services/rotation_scheduler.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -48,6 +50,7 @@ void main() async {
   await Hive.openBox<User>('users');
   await Hive.openBox<ChatSession>('chat_sessions');
   await MessageCache.instance.init();
+  if (!kIsWeb) await AppDatabase.instance.init();
 
   // Workmanager uses native APIs (e.g. getCallbackHandle) not available on web.
   if (!kIsWeb) {
@@ -63,6 +66,11 @@ void main() async {
   final userProvider = UserProvider();
   final chatSessionProvider = ChatSessionProvider();
   final chatService = ChatService('');
+  OfflineProvider? offlineProvider;
+  if (!kIsWeb) {
+    offlineProvider = OfflineProvider(firestore: firestoreProvider.firestore);
+    await offlineProvider.init();
+  }
 
   runApp(
     MultiProvider(
@@ -71,6 +79,7 @@ void main() async {
         ChangeNotifierProvider<FirestoreProvider>.value(
           value: firestoreProvider,
         ),
+        Provider<OfflineProvider?>.value(value: offlineProvider),
         ChangeNotifierProvider<AdminMessagesProvider>(
           create: (ctx) => AdminMessagesProvider(
             firestore: ctx.read<FirestoreProvider>().firestore,
