@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 import '../models/chat_session.dart';
-import '../screens/admin_chat_dashboard_screen.dart';
-import '../screens/admin_rotation_status_screen.dart';
-import '../screens/admin_system_settings_screen.dart';
+import 'admin/admin_dashboard.dart';
+import 'admin_chat_dashboard_screen.dart';
+import 'admin_rotation_status_screen.dart';
+import 'admin_system_settings_screen.dart';
 
 class AdministratorDashboardScreen extends StatefulWidget {
   const AdministratorDashboardScreen({super.key});
@@ -22,7 +23,7 @@ class _AdministratorDashboardScreenState
   @override
   Widget build(BuildContext context) {
     final screens = [
-      const AdministratorChatDashboardScreen(),
+      const AdminDashboard(),
       const AdminRotationStatusScreen(),
       const AdministratorSystemSettingsScreen(),
     ];
@@ -38,8 +39,8 @@ class _AdministratorDashboardScreenState
         onTap: (index) => setState(() => _currentIndex = index),
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.chat),
-            label: 'Chats',
+            icon: Icon(Icons.inbox),
+            label: 'Messages',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.security),

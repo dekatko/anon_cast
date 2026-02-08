@@ -24,19 +24,15 @@ class EncryptionUtil {
 
     final keyBytes = base64Decode(key);
 
-    // Create a CBC block cipher with AES engine
     final blockCipher = CBCBlockCipher(AESEngine());
-
-    // Initialize the cipher for encryption with key and IV (initialization vector)
     final params = ParametersWithIV(KeyParameter(keyBytes), iv);
-    blockCipher.init(true, params);
-
-    // Encrypt the data with padding
     final paddedBlockCipher =
         PaddedBlockCipherImpl(PKCS7Padding(), blockCipher);
-    final encryptedBytes =
-        paddedBlockCipher.process(Uint8List.fromList(utf8.encode(data)));
-
+    final plainBytes = data.isEmpty
+        ? Uint8List.fromList([_emptySentinel])
+        : Uint8List.fromList(utf8.encode(data));
+    paddedBlockCipher.init(true, PaddedBlockCipherParameters(params, null));
+    final encryptedBytes = paddedBlockCipher.process(plainBytes);
     return base64Encode(encryptedBytes);
   }
 
@@ -60,21 +56,22 @@ class EncryptionUtil {
     // Convert encrypted data to Uint8List
     final encryptedBytes = Uint8List.fromList(base64Decode(encryptedData));
 
-    // Decryption logic
     final blockCipher = CBCBlockCipher(AESEngine());
     final params = ParametersWithIV(KeyParameter(keyBytes), ivBytes);
-    blockCipher.init(false, params); // False for decryption mode
-
     final paddedBlockCipher =
         PaddedBlockCipherImpl(PKCS7Padding(), blockCipher);
+    paddedBlockCipher.init(false, PaddedBlockCipherParameters(params, null));
     final decryptedBytes = paddedBlockCipher.process(encryptedBytes);
-
-    // Return the decrypted string (assuming UTF-8 encoding)
+    if (decryptedBytes.length == 1 &&
+        decryptedBytes[0] == _emptySentinel) {
+      return '';
+    }
     return utf8.decode(decryptedBytes);
   }
 
   /// Encrypts [data] with raw [keyBytes] (32 bytes) and [iv] (16 bytes).
   /// Returns base64-encoded ciphertext. Use for key rotation when key is Uint8List.
+  /// Empty string is encoded as a single sentinel byte so round-trip works (pointycastle does not support 0-length input).
   static String encryptWithKeyBytes(
       String data, Uint8List keyBytes, Uint8List iv) {
     if (keyBytes.length != _keyLength) {
@@ -84,15 +81,19 @@ class EncryptionUtil {
     if (iv.length != 16) {
       throw ArgumentError('IV must be 16 bytes long.');
     }
+    final plainBytes = data.isEmpty
+        ? Uint8List.fromList([_emptySentinel])
+        : Uint8List.fromList(utf8.encode(data));
     final blockCipher = CBCBlockCipher(AESEngine());
     final params = ParametersWithIV(KeyParameter(keyBytes), iv);
-    blockCipher.init(true, params);
     final paddedBlockCipher =
         PaddedBlockCipherImpl(PKCS7Padding(), blockCipher);
-    final encryptedBytes =
-        paddedBlockCipher.process(Uint8List.fromList(utf8.encode(data)));
+    paddedBlockCipher.init(true, PaddedBlockCipherParameters(params, null));
+    final encryptedBytes = paddedBlockCipher.process(plainBytes);
     return base64Encode(encryptedBytes);
   }
+
+  static const int _emptySentinel = 0;
 
   /// Decrypts [encryptedData] (base64) with raw [keyBytes] and [iv].
   static String decryptWithKeyBytes(
@@ -107,10 +108,14 @@ class EncryptionUtil {
     final encryptedBytes = Uint8List.fromList(base64Decode(encryptedData));
     final blockCipher = CBCBlockCipher(AESEngine());
     final params = ParametersWithIV(KeyParameter(keyBytes), iv);
-    blockCipher.init(false, params);
     final paddedBlockCipher =
         PaddedBlockCipherImpl(PKCS7Padding(), blockCipher);
+    paddedBlockCipher.init(false, PaddedBlockCipherParameters(params, null));
     final decryptedBytes = paddedBlockCipher.process(encryptedBytes);
+    if (decryptedBytes.length == 1 &&
+        decryptedBytes[0] == _emptySentinel) {
+      return '';
+    }
     return utf8.decode(decryptedBytes);
   }
 

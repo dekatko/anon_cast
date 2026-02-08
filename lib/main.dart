@@ -1,4 +1,7 @@
+import 'package:anon_cast/l10n/app_localizations.dart';
+import 'package:anon_cast/l10n/app_localizations_delegate.dart';
 import 'package:anon_cast/models/chat_session.dart';
+import 'package:anon_cast/provider/admin_messages_provider.dart';
 import 'package:anon_cast/provider/chat_session_provider.dart';
 import 'package:anon_cast/provider/firestore_provider.dart';
 import 'package:anon_cast/screens/login_screen.dart';
@@ -6,6 +9,7 @@ import 'package:anon_cast/services/chat_service.dart';
 import 'package:anon_cast/services/rotation_scheduler.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
 import 'package:workmanager/workmanager.dart';
@@ -58,6 +62,11 @@ void main() async {
         ChangeNotifierProvider<FirestoreProvider>.value(
           value: firestoreProvider,
         ),
+        ChangeNotifierProvider<AdminMessagesProvider>(
+          create: (ctx) => AdminMessagesProvider(
+            firestore: ctx.read<FirestoreProvider>().firestore,
+          ),
+        ),
         ChangeNotifierProvider<UserProvider>(create: (_) => userProvider),
         ChangeNotifierProvider<ChatSessionProvider>(create: (_) => chatSessionProvider),
         Provider<ChatService>(create: (_) => chatService),
@@ -73,9 +82,16 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: LoginScreen(),
+      home: const LoginScreen(),
+      localizationsDelegates: [
+        const AppLocalizationsDelegate(),
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
     );
   }
 }
