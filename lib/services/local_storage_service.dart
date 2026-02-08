@@ -5,10 +5,11 @@ import 'package:path_provider/path_provider.dart';
 
 import '../models/conversation_key.dart';
 import '../models/message.dart';
+import 'message_storage_interface.dart';
 
 /// Box names for local storage. Data is stored in app documents directory
 /// (cleared by OS on app uninstall for privacy).
-class LocalStorageService {
+class LocalStorageService implements MessageServiceStorage {
   LocalStorageService._({Logger? logger}) : _log = logger ?? Logger();
   static final LocalStorageService _instance = LocalStorageService._();
   static LocalStorageService get instance => _instance;
@@ -93,6 +94,18 @@ class LocalStorageService {
       _log.d('LocalStorageService: stored message ${message.id}');
     } catch (e, st) {
       _log.e('LocalStorageService: storeMessage failed', error: e, stackTrace: st);
+      rethrow;
+    }
+  }
+
+  /// Deletes a message by [messageId] from local storage.
+  Future<void> deleteMessage(String messageId) async {
+    if (!_initialized) await init();
+    try {
+      await _messages.delete(messageId);
+      _log.d('LocalStorageService: deleted message $messageId');
+    } catch (e, st) {
+      _log.e('LocalStorageService: deleteMessage failed', error: e, stackTrace: st);
       rethrow;
     }
   }
