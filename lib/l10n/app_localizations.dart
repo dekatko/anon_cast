@@ -104,6 +104,21 @@ class AppLocalizations {
   String get threadErrorSend =>
       _localizedValues[locale.languageCode]?['threadErrorSend'] ?? 'Failed to send message';
 
+  String get statusSending =>
+      _localizedValues[locale.languageCode]?['statusSending'] ?? 'Sending…';
+  String get statusFailed =>
+      _localizedValues[locale.languageCode]?['statusFailed'] ?? 'Failed to send';
+  String get statusSent =>
+      _localizedValues[locale.languageCode]?['statusSent'] ?? 'Sent';
+  String get statusSyncing =>
+      _localizedValues[locale.languageCode]?['statusSyncing'] ?? 'Syncing…';
+  String get encryptionTooltip =>
+      _localizedValues[locale.languageCode]?['encryptionTooltip'] ?? 'End-to-end encrypted';
+  String get offlineBannerMessage =>
+      _localizedValues[locale.languageCode]?['offlineBannerMessage'] ?? 'Offline – messages will send when connected';
+  String get messagesWaitingToSend => _localizedValues[locale.languageCode]?['messagesWaitingToSend'] ??
+      'messages waiting to send';
+
   // ——— User management (access codes) ———
   String get userManagementTitle =>
       _localizedValues[locale.languageCode]?['userManagementTitle'] ?? 'Access codes';
@@ -240,6 +255,13 @@ class AppLocalizations {
       'messageFromAnonymous': 'Message from anonymous user',
       'messageFromYou': 'Your message',
       'threadErrorSend': 'Failed to send message',
+      'statusSending': 'Sending…',
+      'statusFailed': 'Failed to send',
+      'statusSent': 'Sent',
+      'statusSyncing': 'Syncing…',
+      'encryptionTooltip': 'End-to-end encrypted',
+      'offlineBannerMessage': 'Offline – messages will send when connected',
+      'messagesWaitingToSend': 'messages waiting to send',
       'userManagementTitle': 'Access codes',
       'generateNewCode': 'Generate new code',
       'expiryTime': 'Expiry',
@@ -326,6 +348,13 @@ class AppLocalizations {
       'messageFromAnonymous': 'Nachricht von anonymem Nutzer',
       'messageFromYou': 'Deine Nachricht',
       'threadErrorSend': 'Nachricht konnte nicht gesendet werden',
+      'statusSending': 'Wird gesendet…',
+      'statusFailed': 'Senden fehlgeschlagen',
+      'statusSent': 'Gesendet',
+      'statusSyncing': 'Wird synchronisiert…',
+      'encryptionTooltip': 'Ende-zu-Ende verschlüsselt',
+      'offlineBannerMessage': 'Offline – Nachrichten werden bei Verbindung gesendet',
+      'messagesWaitingToSend': 'Nachrichten warten auf Versand',
       'userManagementTitle': 'Zugangscodes',
       'generateNewCode': 'Neuen Code erzeugen',
       'expiryTime': 'Gültigkeit',

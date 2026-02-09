@@ -39,6 +39,8 @@ class MessageSyncService {
 
   final StreamController<bool> _connectivityController = StreamController<bool>.broadcast();
   Stream<bool> get connectivityStream => _connectivityController.stream;
+  final StreamController<void> _pendingChangedController = StreamController<void>.broadcast();
+  Stream<void> get pendingChanged => _pendingChangedController.stream;
   bool _isOnline = true;
   bool get isOnline => _isOnline;
 
@@ -72,9 +74,24 @@ class MessageSyncService {
     });
   }
 
+  List<SyncedMessage> _mergedForConversation(String conversationId, List<SyncedMessage> server) {
+    final pendingIds = _cache.getPendingLocalIds(conversationId);
+    final pendingList = <SyncedMessage>[];
+    for (final lid in pendingIds) {
+      final m = _cache.getPending(lid);
+      if (m != null) {
+        try {
+          pendingList.add(SyncedMessage.fromPendingMap(m, lid));
+        } catch (_) {}
+      }
+    }
+    return _merge(server, pendingList);
+  }
+
   /// Watch messages for a conversation: merges Firestore stream + cached + pending, with offline support.
   Stream<List<SyncedMessage>> watchConversation(String conversationId) async* {
     await init();
+    List<SyncedMessage> lastServer = [];
     final pendingIds = _cache.getPendingLocalIds(conversationId);
     final pending = <SyncedMessage>[];
     for (final lid in pendingIds) {
@@ -87,8 +104,8 @@ class MessageSyncService {
     }
     final cached = _cache.getCachedMessages(conversationId);
     final fromCache = cached.map((m) => _mapToSynced(m)).whereType<SyncedMessage>().toList();
-    final merged = _merge(fromCache, pending);
-    yield merged;
+    lastServer = fromCache;
+    yield _merge(fromCache, pending);
 
     final stream = _firestore
         .collection('messages')
@@ -96,23 +113,41 @@ class MessageSyncService {
         .orderBy('timestamp', descending: false)
         .snapshots();
 
-    await for (final snapshot in stream) {
-      final server = snapshot.docs
-          .map((d) => SyncedMessage.fromFirestore(d, _isAdmin() ? _currentUserId : null))
-          .toList();
-      final payloads = snapshot.docs.map((d) => _docToCacheMap(d)).toList();
-      unawaited(_cache.setCachedMessages(conversationId, payloads));
-      final pendingNow = _cache.getPendingLocalIds(conversationId);
-      final pendingList = <SyncedMessage>[];
-      for (final lid in pendingNow) {
-        final m = _cache.getPending(lid);
-        if (m != null) {
-          try {
-            pendingList.add(SyncedMessage.fromPendingMap(m, lid));
-          } catch (_) {}
-        }
+    final outputController = StreamController<List<SyncedMessage>>.broadcast();
+    StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? firestoreSub;
+    StreamSubscription<void>? pendingSub;
+    void emitMerged() {
+      if (!outputController.isClosed) {
+        outputController.add(_mergedForConversation(conversationId, lastServer));
       }
-      yield _merge(server, pendingList);
+    }
+    pendingSub = _pendingChangedController.stream.listen((_) {
+      emitMerged();
+    });
+
+    firestoreSub = stream.listen(
+      (snapshot) {
+        lastServer = snapshot.docs
+            .map((d) => SyncedMessage.fromFirestore(d, _isAdmin() ? _currentUserId : null))
+            .toList();
+        final payloads = snapshot.docs.map((d) => _docToCacheMap(d)).toList();
+        unawaited(_cache.setCachedMessages(conversationId, payloads));
+        emitMerged();
+      },
+      onError: outputController.addError,
+      onDone: () {
+        pendingSub?.cancel();
+        outputController.close();
+      },
+      cancelOnError: false,
+    );
+
+    try {
+      yield* outputController.stream;
+    } finally {
+      await firestoreSub.cancel();
+      await pendingSub?.cancel();
+      if (!outputController.isClosed) outputController.close();
     }
   }
 
@@ -205,15 +240,26 @@ class MessageSyncService {
         'timestamp': FieldValue.serverTimestamp(),
       };
       await ref.set(firestorePayload);
-      await _cache.removePending(localId);
-      return SendResult(syncedMessage: synced.copyWith(syncStatus: SyncStatus.sent));
+    await _cache.removePending(localId);
+    _pendingChangedController.add(null);
+    return SendResult(syncedMessage: synced.copyWith(syncStatus: SyncStatus.sent));
     } catch (e) {
       await _cache.addPending(localId, payload);
+      _pendingChangedController.add(null);
       return SendResult(
         syncedMessage: synced.copyWith(syncStatus: SyncStatus.failed),
         queued: true,
       );
     }
+  }
+
+  /// Retry sending a single pending message (e.g. user tapped Retry). Notifies stream to refresh.
+  Future<void> retryPendingMessage(String localId) async {
+    await init();
+    final data = _cache.getPending(localId);
+    if (data == null) return;
+    await _trySendPending(localId, Map<String, dynamic>.from(data));
+    _pendingChangedController.add(null);
   }
 
   /// Call when connectivity is restored to flush the pending queue with exponential backoff.
@@ -253,12 +299,14 @@ class MessageSyncService {
       if (payload['iv'] != null) firestorePayload['iv'] = payload['iv'];
       await ref.set(firestorePayload);
       await _cache.removePending(localId);
+      _pendingChangedController.add(null);
     } catch (e) {
       await _cache.updatePending(localId, {
         'retryCount': retryCount + 1,
         'nextRetryAt': DateTime.now().millisecondsSinceEpoch + backoffMs,
         'syncStatus': 'failed',
       });
+      _pendingChangedController.add(null);
       if (retryCount + 1 < _maxRetries) {
         Future.delayed(Duration(milliseconds: backoffMs), () => _trySendPending(localId, payload));
       }

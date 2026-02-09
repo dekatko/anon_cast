@@ -198,6 +198,13 @@ class MessageThreadProvider extends ChangeNotifier {
     } catch (_) {}
   }
 
+  /// Retry sending a failed/pending message (e.g. user tapped Retry). [messageId] is the local id for pending messages.
+  Future<void> retryFailedMessage(String messageId) async {
+    if (_syncService == null) return;
+    await _syncService!.retryPendingMessage(messageId);
+    notifyListeners();
+  }
+
   /// Call when the user is typing. Throttle in UI (e.g. every 1s).
   Future<void> setTyping(bool isTyping) async {
     try {

@@ -6,10 +6,10 @@ import 'package:provider/provider.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../models/admin_message.dart';
+import '../../models/sync_status.dart';
 import '../../provider/firestore_provider.dart';
 import '../../provider/message_thread_provider.dart';
 import '../../services/message_sync_service.dart';
-import '../../widgets/offline_indicator.dart';
 import '../../widgets/sync_status_badge.dart';
 import 'widgets/message_bubble.dart';
 import 'widgets/typing_indicator.dart';
@@ -133,7 +133,19 @@ class _MessageThreadBodyState extends State<_MessageThreadBody> {
           Consumer<MessageThreadProvider>(
             builder: (context, provider, _) {
               if (!provider.isOffline) return const SizedBox.shrink();
-              return OfflineIndicator(isOffline: true);
+              return ConnectionBanner(message: l10n.offlineBannerMessage);
+            },
+          ),
+          Consumer<MessageThreadProvider>(
+            builder: (context, provider, _) {
+              final pendingCount = provider.syncedMessages
+                  .where((s) => s.syncStatus.isPending)
+                  .length;
+              if (pendingCount == 0) return const SizedBox.shrink();
+              return _PendingBanner(
+                count: pendingCount,
+                label: l10n.messagesWaitingToSend,
+              );
             },
           ),
           Expanded(
@@ -205,7 +217,10 @@ class _MessageThreadBodyState extends State<_MessageThreadBody> {
                     final syncStatus = index < syncedList.length
                         ? syncedList[index].syncStatus
                         : null;
-                    final showSyncBadge = message.isFromAdmin && syncStatus != null;
+                    final localId = index < syncedList.length
+                        ? syncedList[index].localId
+                        : null;
+                    final messageId = localId ?? message.id;
 
                     final bubble = MessageBubble(
                       message: message,
@@ -213,9 +228,13 @@ class _MessageThreadBodyState extends State<_MessageThreadBody> {
                       readStatusLabel: readLabel,
                       semanticsLabel: semanticsLabel,
                       isEncrypted: message.encryptedContent.isNotEmpty,
+                      syncStatus: syncStatus,
+                      onRetry: syncStatus?.isFailed == true
+                          ? () => provider.retryFailedMessage(messageId)
+                          : null,
                     );
 
-                    if (showSyncBadge) {
+                    if (message.isFromAdmin && syncStatus != null) {
                       return Align(
                         alignment: Alignment.centerRight,
                         child: Row(
@@ -241,6 +260,82 @@ class _MessageThreadBodyState extends State<_MessageThreadBody> {
             controller: widget.inputController,
             maxChars: widget.maxChars,
             onScrollToBottom: () => widget.onScrollToBottom(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Connection status banner shown when offline.
+class ConnectionBanner extends StatelessWidget {
+  const ConnectionBanner({super.key, this.message});
+
+  final String? message;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = message ?? 'Offline – messages will send when connected';
+    return Semantics(
+      label: text,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        color: Colors.orange,
+        child: SafeArea(
+          top: true,
+          bottom: false,
+          child: Row(
+            children: [
+              Icon(Icons.cloud_off, size: 20, color: Colors.orange.shade900),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  text,
+                  style: TextStyle(
+                    color: Colors.orange.shade900,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Banner showing number of messages waiting to send (pending/syncing).
+class _PendingBanner extends StatelessWidget {
+  const _PendingBanner({required this.count, required this.label});
+
+  final int count;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      color: Colors.orange.shade50,
+      child: Row(
+        children: [
+          SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Colors.orange.shade700,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            '$count $label',
+            style: TextStyle(
+              color: Colors.orange.shade900,
+              fontSize: 13,
+            ),
           ),
         ],
       ),
