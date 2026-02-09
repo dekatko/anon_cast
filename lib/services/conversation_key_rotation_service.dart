@@ -377,6 +377,25 @@ class ConversationKeyRotationService {
     return map.keys.toList();
   }
 
+  /// Forces rotation of all conversation keys (ignores policy). Use for "Force Key Rotation" in settings.
+  /// Returns the number of conversations rotated.
+  Future<int> forceRotateAll({
+    void Function(ConversationRotationProgress)? onProgress,
+  }) async {
+    int rotated = 0;
+    for (final id in await getConversationIds()) {
+      try {
+        await rotateKey(id, onProgress: onProgress);
+        rotated++;
+      } on ConversationKeyRotationException catch (e) {
+        _log.w('Rotation skipped for $id: ${e.message}', error: e.cause);
+      } catch (e, st) {
+        _log.w('Rotation skipped for $id', error: e, stackTrace: st);
+      }
+    }
+    return rotated;
+  }
+
   /// Checks all conversations and rotates those that need it. Skips when offline
   /// (no Firestore). Returns count rotated.
   Future<int> checkAndRotateAll({

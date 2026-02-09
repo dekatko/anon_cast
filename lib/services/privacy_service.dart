@@ -160,6 +160,27 @@ class PrivacyService {
     }
   }
 
+  /// Clears all local data (secure overwrite + clearAllData) without signing out.
+  /// Use for "Clear All Local Data" in settings.
+  Future<void> clearAllLocalData() async {
+    try {
+      final messageIds = await _storage.getAllMessageIds();
+      final convKeys = await _storage.getAllConversationKeys();
+      for (final mid in messageIds) {
+        await _secureOverwriteMessage(mid, _defaultSecurePasses);
+      }
+      for (final cid in convKeys.keys) {
+        await _secureOverwriteKey(cid, _defaultSecurePasses);
+      }
+      _offlineQueue?.clearQueue();
+      await LocalStorageService.instance.clearAllData();
+      _log.i('PrivacyService: clearAllLocalData completed (secure wipe)');
+    } catch (e, st) {
+      _log.e('PrivacyService: clearAllLocalData failed', error: e, stackTrace: st);
+      rethrow;
+    }
+  }
+
   /// Logout cleanup. Anonymous: full secure wipe of messages and keys, clear caches, sign out, clear queue. Admin: keep keys and metadata, clear temp caches only.
   Future<void> cleanupOnLogout({required bool isAnonymous}) async {
     try {

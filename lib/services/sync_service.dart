@@ -145,7 +145,8 @@ class SyncService {
 
   /// Imports conversation keys from a password-encrypted string (base64 from export).
   /// Restores each key to Hive and to [EncryptionService] so messages can be decrypted.
-  Future<void> importEncryptedKeys(String encryptedData, String userPassword) async {
+  /// Returns the number of keys imported.
+  Future<int> importEncryptedKeys(String encryptedData, String userPassword) async {
     if (encryptedData.isEmpty) {
       throw SyncServiceException('Encrypted data must not be empty.');
     }
@@ -173,14 +174,17 @@ class SyncService {
       final payload = utf8.decode(plainBytes);
       final keys = jsonDecode(payload) as Map<String, dynamic>;
       await _storage.init();
+      int count = 0;
       for (final entry in keys.entries) {
         final conversationId = entry.key;
         final key = entry.value as String?;
         if (conversationId.isEmpty || key == null || key.isEmpty) continue;
         await _storage.storeConversationKey(conversationId, key);
         await _encryption.storeKeyLocally(conversationId, key);
+        count++;
       }
-      _log.d('SyncService: imported ${keys.length} keys');
+      _log.d('SyncService: imported $count keys');
+      return count;
     } on FormatException catch (e) {
       _log.w('SyncService: importEncryptedKeys bad base64/JSON or wrong password', error: e);
       throw SyncServiceException('Invalid backup or wrong password.', cause: e);

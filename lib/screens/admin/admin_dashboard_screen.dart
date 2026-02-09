@@ -16,6 +16,7 @@ import '../../services/local_storage_service.dart';
 import '../../services/security_validator.dart';
 import 'admin_security_audit_screen.dart';
 import '../messages/message_thread_screen.dart';
+import '../settings/settings_screen.dart';
 
 /// Conversation summary for the dashboard list (derived from [AdminMessage]s + key rotation).
 class ConversationSummary {
@@ -126,13 +127,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   void _openSettings(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (context) =>
-            _SettingsPlaceholder(onNavigateToSecurity: () {
-          Navigator.pop(context);
-          setState(() {
-            _auditFuture = _securityValidator.runSecurityAudit();
-          });
-        }),
+        builder: (context) => const SettingsScreen(),
       ),
     );
   }
@@ -212,31 +207,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             onPressed: () => Navigator.pop(context),
             child: Text(l10n.cancel),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Placeholder for settings; in a full app this would be your settings screen.
-class _SettingsPlaceholder extends StatelessWidget {
-  const _SettingsPlaceholder({this.onNavigateToSecurity});
-
-  final VoidCallback? onNavigateToSecurity;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.settingsLabel)),
-      body: ListView(
-        children: [
-          if (onNavigateToSecurity != null)
-            ListTile(
-              leading: const Icon(Icons.security),
-              title: const Text('Security audit'),
-              onTap: onNavigateToSecurity,
-            ),
         ],
       ),
     );

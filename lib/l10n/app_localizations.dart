@@ -138,6 +138,48 @@ class AppLocalizations {
   String get settingsLabel => _localizedValues[locale.languageCode]?['settingsLabel'] ?? 'Settings';
   String get conversationsLabel => _localizedValues[locale.languageCode]?['conversationsLabel'] ?? 'Conversations';
 
+  // ——— Settings (privacy, keys, security) ———
+  String get clearAllLocalData => _localizedValues[locale.languageCode]?['clearAllLocalData'] ?? 'Clear All Local Data';
+  String get clearAllLocalDataSubtitle => _localizedValues[locale.languageCode]?['clearAllLocalDataSubtitle'] ?? 'Remove all messages and keys from this device';
+  String get autoClearOnLogout => _localizedValues[locale.languageCode]?['autoClearOnLogout'] ?? 'Auto-clear on Logout';
+  String get autoClearOnLogoutSubtitle => _localizedValues[locale.languageCode]?['autoClearOnLogoutSubtitle'] ?? 'Automatically delete data when logging out';
+  String get exportEncryptionKeys => _localizedValues[locale.languageCode]?['exportEncryptionKeys'] ?? 'Export Encryption Keys';
+  String get exportEncryptionKeysSubtitle => _localizedValues[locale.languageCode]?['exportEncryptionKeysSubtitle'] ?? 'Backup keys to transfer to another device';
+  String get importEncryptionKeys => _localizedValues[locale.languageCode]?['importEncryptionKeys'] ?? 'Import Encryption Keys';
+  String get importEncryptionKeysSubtitle => _localizedValues[locale.languageCode]?['importEncryptionKeysSubtitle'] ?? 'Restore keys from backup file';
+  String get runSecurityAudit => _localizedValues[locale.languageCode]?['runSecurityAudit'] ?? 'Run Security Audit';
+  String get runSecurityAuditSubtitle => _localizedValues[locale.languageCode]?['runSecurityAuditSubtitle'] ?? 'Verify encryption is working correctly';
+  String get forceKeyRotation => _localizedValues[locale.languageCode]?['forceKeyRotation'] ?? 'Force Key Rotation';
+  String get forceKeyRotationSubtitle => _localizedValues[locale.languageCode]?['forceKeyRotationSubtitle'] ?? 'Rotate all conversation keys now';
+  String get protectYourKeys => _localizedValues[locale.languageCode]?['protectYourKeys'] ?? 'Protect Your Keys';
+  String get protectYourKeysMessage => _localizedValues[locale.languageCode]?['protectYourKeysMessage'] ?? 'Enter a password to encrypt your key backup';
+  String get enterBackupPassword => _localizedValues[locale.languageCode]?['enterBackupPassword'] ?? 'Enter Backup Password';
+  String get enterBackupPasswordMessage => _localizedValues[locale.languageCode]?['enterBackupPasswordMessage'] ?? 'Enter the password you used when creating this backup';
+  String get exportingKeys => _localizedValues[locale.languageCode]?['exportingKeys'] ?? 'Exporting keys…';
+  String get importingKeys => _localizedValues[locale.languageCode]?['importingKeys'] ?? 'Importing keys…';
+  String get keysExportedTo => _localizedValues[locale.languageCode]?['keysExportedTo'] ?? 'Keys exported to: %s';
+  String get keepBackupSafe => _localizedValues[locale.languageCode]?['keepBackupSafe'] ?? 'Keep Your Backup Safe';
+  String get keepBackupSafeMessage => _localizedValues[locale.languageCode]?['keepBackupSafeMessage'] ?? 'Store this file securely. Anyone with this file and your password can decrypt your messages.';
+  String get iUnderstand => _localizedValues[locale.languageCode]?['iUnderstand'] ?? 'I Understand';
+  String get importSuccessful => _localizedValues[locale.languageCode]?['importSuccessful'] ?? 'Import Successful';
+  String get importSuccessfulMessage => _localizedValues[locale.languageCode]?['importSuccessfulMessage'] ?? 'Imported %s encryption keys. You can now access your conversations.';
+  String get goToDashboard => _localizedValues[locale.languageCode]?['goToDashboard'] ?? 'Go to Dashboard';
+  String get clearAllDataConfirmTitle => _localizedValues[locale.languageCode]?['clearAllDataConfirmTitle'] ?? 'Clear All Local Data?';
+  String get clearAllDataConfirmMessage => _localizedValues[locale.languageCode]?['clearAllDataConfirmMessage'] ?? 'This will permanently delete:\n• All messages stored on this device\n• All encryption keys\n• All conversation history\n\nThis action cannot be undone. Messages in the cloud (encrypted) will remain.';
+  String get clearAllDataButton => _localizedValues[locale.languageCode]?['clearAllDataButton'] ?? 'Clear All Data';
+  String get allLocalDataCleared => _localizedValues[locale.languageCode]?['allLocalDataCleared'] ?? 'All local data cleared';
+  String get continueLabel => _localizedValues[locale.languageCode]?['continueLabel'] ?? 'Continue';
+  String get passwordLabel => _localizedValues[locale.languageCode]?['passwordLabel'] ?? 'Password';
+  String get exportFailed => _localizedValues[locale.languageCode]?['exportFailed'] ?? 'Export failed: %s';
+  String get importFailed => _localizedValues[locale.languageCode]?['importFailed'] ?? 'Import failed: %s';
+  String get importFailedHint => _localizedValues[locale.languageCode]?['importFailedHint'] ?? 'Make sure you entered the correct password.';
+  String get securityCheckFailed => _localizedValues[locale.languageCode]?['securityCheckFailed'] ?? 'Security check failed';
+  String get rotationComplete => _localizedValues[locale.languageCode]?['rotationComplete'] ?? 'Rotation complete: %s keys rotated.';
+  String get rotationFailed => _localizedValues[locale.languageCode]?['rotationFailed'] ?? 'Rotation failed: %s';
+  String get privacySectionTitle => _localizedValues[locale.languageCode]?['privacySectionTitle'] ?? 'Privacy';
+  String get keyManagementSectionTitle => _localizedValues[locale.languageCode]?['keyManagementSectionTitle'] ?? 'Key Management';
+  String get securitySectionTitle => _localizedValues[locale.languageCode]?['securitySectionTitle'] ?? 'Security';
+
   // ——— User management (access codes) ———
   String get userManagementTitle =>
       _localizedValues[locale.languageCode]?['userManagementTitle'] ?? 'Access codes';
@@ -298,6 +340,46 @@ class AppLocalizations {
       'shareLabel': 'Share',
       'settingsLabel': 'Settings',
       'conversationsLabel': 'Conversations',
+      'clearAllLocalData': 'Clear All Local Data',
+      'clearAllLocalDataSubtitle': 'Remove all messages and keys from this device',
+      'autoClearOnLogout': 'Auto-clear on Logout',
+      'autoClearOnLogoutSubtitle': 'Automatically delete data when logging out',
+      'exportEncryptionKeys': 'Export Encryption Keys',
+      'exportEncryptionKeysSubtitle': 'Backup keys to transfer to another device',
+      'importEncryptionKeys': 'Import Encryption Keys',
+      'importEncryptionKeysSubtitle': 'Restore keys from backup file',
+      'runSecurityAudit': 'Run Security Audit',
+      'runSecurityAuditSubtitle': 'Verify encryption is working correctly',
+      'forceKeyRotation': 'Force Key Rotation',
+      'forceKeyRotationSubtitle': 'Rotate all conversation keys now',
+      'protectYourKeys': 'Protect Your Keys',
+      'protectYourKeysMessage': 'Enter a password to encrypt your key backup',
+      'enterBackupPassword': 'Enter Backup Password',
+      'enterBackupPasswordMessage': 'Enter the password you used when creating this backup',
+      'exportingKeys': 'Exporting keys…',
+      'importingKeys': 'Importing keys…',
+      'keysExportedTo': 'Keys exported to: %s',
+      'keepBackupSafe': 'Keep Your Backup Safe',
+      'keepBackupSafeMessage': 'Store this file securely. Anyone with this file and your password can decrypt your messages.',
+      'iUnderstand': 'I Understand',
+      'importSuccessful': 'Import Successful',
+      'importSuccessfulMessage': 'Imported %s encryption keys. You can now access your conversations.',
+      'goToDashboard': 'Go to Dashboard',
+      'clearAllDataConfirmTitle': 'Clear All Local Data?',
+      'clearAllDataConfirmMessage': 'This will permanently delete:\n• All messages stored on this device\n• All encryption keys\n• All conversation history\n\nThis action cannot be undone. Messages in the cloud (encrypted) will remain.',
+      'clearAllDataButton': 'Clear All Data',
+      'allLocalDataCleared': 'All local data cleared',
+      'continueLabel': 'Continue',
+      'passwordLabel': 'Password',
+      'exportFailed': 'Export failed: %s',
+      'importFailed': 'Import failed: %s',
+      'importFailedHint': 'Make sure you entered the correct password.',
+      'securityCheckFailed': 'Security check failed',
+      'rotationComplete': 'Rotation complete: %s keys rotated.',
+      'rotationFailed': 'Rotation failed: %s',
+      'privacySectionTitle': 'Privacy',
+      'keyManagementSectionTitle': 'Key Management',
+      'securitySectionTitle': 'Security',
       'userManagementTitle': 'Access codes',
       'generateNewCode': 'Generate new code',
       'expiryTime': 'Expiry',
@@ -408,6 +490,46 @@ class AppLocalizations {
       'shareLabel': 'Teilen',
       'settingsLabel': 'Einstellungen',
       'conversationsLabel': 'Unterhaltungen',
+      'clearAllLocalData': 'Alle lokalen Daten löschen',
+      'clearAllLocalDataSubtitle': 'Alle Nachrichten und Schlüssel von diesem Gerät entfernen',
+      'autoClearOnLogout': 'Beim Abmelden automatisch löschen',
+      'autoClearOnLogoutSubtitle': 'Daten beim Abmelden automatisch löschen',
+      'exportEncryptionKeys': 'Verschlüsselungsschlüssel exportieren',
+      'exportEncryptionKeysSubtitle': 'Schlüssel sichern, um sie auf ein anderes Gerät zu übertragen',
+      'importEncryptionKeys': 'Verschlüsselungsschlüssel importieren',
+      'importEncryptionKeysSubtitle': 'Schlüssel aus Sicherungskopie wiederherstellen',
+      'runSecurityAudit': 'Sicherheitsprüfung ausführen',
+      'runSecurityAuditSubtitle': 'Prüfen, ob die Verschlüsselung korrekt funktioniert',
+      'forceKeyRotation': 'Schlüsselrotation erzwingen',
+      'forceKeyRotationSubtitle': 'Alle Konversationsschlüssel jetzt rotieren',
+      'protectYourKeys': 'Schlüssel schützen',
+      'protectYourKeysMessage': 'Geben Sie ein Passwort ein, um Ihren Schlüssel-Backup zu verschlüsseln',
+      'enterBackupPassword': 'Backup-Passwort eingeben',
+      'enterBackupPasswordMessage': 'Geben Sie das Passwort ein, das Sie bei der Erstellung dieses Backups verwendet haben',
+      'exportingKeys': 'Schlüssel werden exportiert…',
+      'importingKeys': 'Schlüssel werden importiert…',
+      'keysExportedTo': 'Schlüssel exportiert nach: %s',
+      'keepBackupSafe': 'Backup sicher aufbewahren',
+      'keepBackupSafeMessage': 'Bewahren Sie diese Datei sicher auf. Jeder mit dieser Datei und Ihrem Passwort kann Ihre Nachrichten entschlüsseln.',
+      'iUnderstand': 'Verstanden',
+      'importSuccessful': 'Import erfolgreich',
+      'importSuccessfulMessage': '%s Verschlüsselungsschlüssel importiert. Sie können jetzt auf Ihre Konversationen zugreifen.',
+      'goToDashboard': 'Zum Dashboard',
+      'clearAllDataConfirmTitle': 'Alle lokalen Daten löschen?',
+      'clearAllDataConfirmMessage': 'Dies dauerhaft löschen:\n• Alle auf diesem Gerät gespeicherten Nachrichten\n• Alle Verschlüsselungsschlüssel\n• Den gesamten Konversationsverlauf\n\nDiese Aktion kann nicht rückgängig gemacht werden. Nachrichten in der Cloud (verschlüsselt) bleiben erhalten.',
+      'clearAllDataButton': 'Alle Daten löschen',
+      'allLocalDataCleared': 'Alle lokalen Daten gelöscht',
+      'continueLabel': 'Weiter',
+      'passwordLabel': 'Passwort',
+      'exportFailed': 'Export fehlgeschlagen: %s',
+      'importFailed': 'Import fehlgeschlagen: %s',
+      'importFailedHint': 'Stellen Sie sicher, dass Sie das richtige Passwort eingegeben haben.',
+      'securityCheckFailed': 'Sicherheitsprüfung fehlgeschlagen',
+      'rotationComplete': 'Rotation abgeschlossen: %s Schlüssel rotiert.',
+      'rotationFailed': 'Rotation fehlgeschlagen: %s',
+      'privacySectionTitle': 'Datenschutz',
+      'keyManagementSectionTitle': 'Schlüsselverwaltung',
+      'securitySectionTitle': 'Sicherheit',
       'userManagementTitle': 'Zugangscodes',
       'generateNewCode': 'Neuen Code erzeugen',
       'expiryTime': 'Gültigkeit',

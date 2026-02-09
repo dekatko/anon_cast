@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'local_storage_service.dart';
+import 'privacy_service.dart';
 
 /// Result of successful anonymous sign-in. Contains Firebase user and admin id
 /// for resolving the chat session.
@@ -74,10 +75,16 @@ class AuthService {
     }
   }
 
+  /// Preference key for "Auto-clear on Logout" (value 'true' or 'false').
+  static const String autoClearOnLogoutPrefKey = 'settings_auto_clear_on_logout';
+
   Future<void> signOut() async {
-    await _auth.signOut();
-    // Privacy: wipe decrypted messages and keys from local storage
-    await LocalStorageService.instance.clearAllData();
+    final autoClear = await LocalStorageService.instance.getUserPref(autoClearOnLogoutPrefKey) == 'true';
+    if (autoClear) {
+      await PrivacyService().cleanupOnLogout(isAnonymous: _auth.currentUser?.isAnonymous ?? true);
+    } else {
+      await _auth.signOut();
+    }
   }
 
   /// Send password reset email. Throws [AuthException] on failure.
