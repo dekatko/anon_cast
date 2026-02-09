@@ -119,6 +119,25 @@ class AppLocalizations {
   String get messagesWaitingToSend => _localizedValues[locale.languageCode]?['messagesWaitingToSend'] ??
       'messages waiting to send';
 
+  String get securityStatus => _localizedValues[locale.languageCode]?['securityStatus'] ?? 'Security Status';
+  String get securityAllPassed => _localizedValues[locale.languageCode]?['securityAllPassed'] ?? 'All checks passed';
+  String get securitySomeFailed => _localizedValues[locale.languageCode]?['securitySomeFailed'] ?? 'Some checks failed';
+  String get viewDetails => _localizedValues[locale.languageCode]?['viewDetails'] ?? 'View Details';
+  String get messagesEncrypted => _localizedValues[locale.languageCode]?['messagesEncrypted'] ?? 'Messages Encrypted';
+  String get keysStoredLocally => _localizedValues[locale.languageCode]?['keysStoredLocally'] ?? 'Keys Stored Locally';
+  String get noDataLeaks => _localizedValues[locale.languageCode]?['noDataLeaks'] ?? 'No Data Leaks';
+  String get rotationDue => _localizedValues[locale.languageCode]?['rotationDue'] ?? 'Rotation due';
+  String keyRotatedDaysAgo(int days) =>
+      _localizedValues[locale.languageCode]?['keyRotatedDaysAgo']?.replaceAll('{days}', '$days') ?? 'Key rotated $days days ago';
+  String get noMessagesYet => _localizedValues[locale.languageCode]?['noMessagesYet'] ?? 'No messages yet';
+  String get generateAccessCode => _localizedValues[locale.languageCode]?['generateAccessCode'] ?? 'Generate Access Code';
+  String get expiryDaysLabel => _localizedValues[locale.languageCode]?['expiryDaysLabel'] ?? 'Expiry (days)';
+  String get accessCodeGenerated => _localizedValues[locale.languageCode]?['accessCodeGenerated'] ?? 'Access Code Generated';
+  String get expiresLabel => _localizedValues[locale.languageCode]?['expiresLabel'] ?? 'Expires';
+  String get shareLabel => _localizedValues[locale.languageCode]?['shareLabel'] ?? 'Share';
+  String get settingsLabel => _localizedValues[locale.languageCode]?['settingsLabel'] ?? 'Settings';
+  String get conversationsLabel => _localizedValues[locale.languageCode]?['conversationsLabel'] ?? 'Conversations';
+
   // ——— User management (access codes) ———
   String get userManagementTitle =>
       _localizedValues[locale.languageCode]?['userManagementTitle'] ?? 'Access codes';
@@ -262,6 +281,23 @@ class AppLocalizations {
       'encryptionTooltip': 'End-to-end encrypted',
       'offlineBannerMessage': 'Offline – messages will send when connected',
       'messagesWaitingToSend': 'messages waiting to send',
+      'securityStatus': 'Security Status',
+      'securityAllPassed': 'All checks passed',
+      'securitySomeFailed': 'Some checks failed',
+      'viewDetails': 'View Details',
+      'messagesEncrypted': 'Messages Encrypted',
+      'keysStoredLocally': 'Keys Stored Locally',
+      'noDataLeaks': 'No Data Leaks',
+      'rotationDue': 'Rotation due',
+      'keyRotatedDaysAgo': 'Key rotated {days} days ago',
+      'noMessagesYet': 'No messages yet',
+      'generateAccessCode': 'Generate Access Code',
+      'expiryDaysLabel': 'Expiry (days)',
+      'accessCodeGenerated': 'Access Code Generated',
+      'expiresLabel': 'Expires',
+      'shareLabel': 'Share',
+      'settingsLabel': 'Settings',
+      'conversationsLabel': 'Conversations',
       'userManagementTitle': 'Access codes',
       'generateNewCode': 'Generate new code',
       'expiryTime': 'Expiry',
@@ -355,6 +391,23 @@ class AppLocalizations {
       'encryptionTooltip': 'Ende-zu-Ende verschlüsselt',
       'offlineBannerMessage': 'Offline – Nachrichten werden bei Verbindung gesendet',
       'messagesWaitingToSend': 'Nachrichten warten auf Versand',
+      'securityStatus': 'Sicherheitsstatus',
+      'securityAllPassed': 'Alle Prüfungen bestanden',
+      'securitySomeFailed': 'Einige Prüfungen fehlgeschlagen',
+      'viewDetails': 'Details anzeigen',
+      'messagesEncrypted': 'Nachrichten verschlüsselt',
+      'keysStoredLocally': 'Schlüssel lokal gespeichert',
+      'noDataLeaks': 'Keine Datenlecks',
+      'rotationDue': 'Rotation fällig',
+      'keyRotatedDaysAgo': 'Schlüssel vor {days} Tagen rotiert',
+      'noMessagesYet': 'Noch keine Nachrichten',
+      'generateAccessCode': 'Zugangscode erzeugen',
+      'expiryDaysLabel': 'Gültigkeit (Tage)',
+      'accessCodeGenerated': 'Zugangscode erzeugt',
+      'expiresLabel': 'Läuft ab',
+      'shareLabel': 'Teilen',
+      'settingsLabel': 'Einstellungen',
+      'conversationsLabel': 'Unterhaltungen',
       'userManagementTitle': 'Zugangscodes',
       'generateNewCode': 'Neuen Code erzeugen',
       'expiryTime': 'Gültigkeit',

@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../models/chat_session.dart';
 import '../provider/offline_provider.dart';
 import '../widgets/offline_banner.dart';
-import 'admin/admin_dashboard.dart';
+import 'admin/admin_dashboard_screen.dart';
 import 'admin/user_management_screen.dart';
 import 'admin_chat_dashboard_screen.dart';
 import 'admin_rotation_status_screen.dart';
@@ -27,7 +27,7 @@ class _AdministratorDashboardScreenState
   @override
   Widget build(BuildContext context) {
     final screens = [
-      const AdminDashboard(),
+      const AdminDashboardScreen(),
       const UserManagementScreen(),
       const AdminRotationStatusScreen(),
       const AdministratorSystemSettingsScreen(),
