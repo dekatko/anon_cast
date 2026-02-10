@@ -8,12 +8,18 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/access_code.dart';
 import '../../models/admin_message.dart';
+import '../../models/message_statistics.dart';
+import '../../models/response_time_analytics.dart';
 import '../../models/security_report.dart';
 import '../../provider/admin_messages_provider.dart';
 import '../../provider/firestore_provider.dart';
 import '../../services/access_code_service.dart';
 import '../../services/local_storage_service.dart';
+import '../../services/reporting_service.dart';
 import '../../services/security_validator.dart';
+import '../../widgets/message_trend_chart.dart';
+import '../../widgets/response_time_card.dart';
+import '../../widgets/statistics_cards.dart';
 import 'admin_security_audit_screen.dart';
 import '../messages/message_thread_screen.dart';
 import '../settings/settings_screen.dart';
@@ -48,13 +54,71 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   final SecurityValidator _securityValidator = SecurityValidator();
   Future<SecurityReport>? _auditFuture;
 
+  late final ReportingService _reportingService;
+  Future<MessageStatistics>? _statisticsFuture;
+  Future<ResponseTimeAnalytics>? _responseTimeFuture;
+  DateTime _startDate = DateTime.now().subtract(const Duration(days: 7));
+  DateTime _endDate = DateTime.now();
+  bool _isLoadingStats = false;
+
   @override
   void initState() {
     super.initState();
     _auditFuture = _securityValidator.runSecurityAudit();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _reportingService = ReportingService(
+        firestore: context.read<FirestoreProvider>().firestore,
+      );
       context.read<AdminMessagesProvider>().startListening(() {});
+      _loadStatistics();
     });
+  }
+
+  Future<void> _loadStatistics() async {
+    final organizationId =
+        FirebaseAuth.instance.currentUser?.uid ?? 'default';
+    setState(() => _isLoadingStats = true);
+    final statsFuture = _reportingService.getMessageStatistics(
+      organizationId: organizationId,
+      startDate: _startDate,
+      endDate: _endDate,
+      bypassCache: true,
+    );
+    final responseFuture = _reportingService.getResponseTimeAnalytics(
+      organizationId: organizationId,
+      startDate: _startDate,
+      endDate: _endDate,
+      bypassCache: true,
+    );
+    setState(() {
+      _statisticsFuture = statsFuture;
+      _responseTimeFuture = responseFuture;
+    });
+    try {
+      await Future.wait([statsFuture, responseFuture]);
+    } catch (_) {
+      // Futures already hold error; FutureBuilder will show it
+    } finally {
+      if (mounted) setState(() => _isLoadingStats = false);
+    }
+  }
+
+  Future<void> _pickDateRange(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+      lastDate: DateTime.now(),
+      initialDateRange: DateTimeRange(start: _startDate, end: _endDate),
+      helpText: l10n.dateRangeLabel,
+    );
+    if (picked != null && mounted) {
+      setState(() {
+        _startDate = picked.start;
+        _endDate = picked.end;
+      });
+      await _loadStatistics();
+    }
   }
 
   @override
@@ -62,10 +126,25 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final l10n = AppLocalizations.of(context);
     final isWide = MediaQuery.sizeOf(context).width > 700;
 
+    final dateFormat = DateFormat('dd.MM');
+    final dateRangeText =
+        '${dateFormat.format(_startDate)} – ${dateFormat.format(_endDate)}';
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.adminDashboardTitle),
         actions: [
+          if (_statisticsFuture != null)
+            IconButton(
+              icon: const Icon(Icons.picture_as_pdf_outlined),
+              onPressed: () {
+                // Placeholder: PDF export to be implemented
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.exportPdfTooltip)),
+                );
+              },
+              tooltip: l10n.exportPdfTooltip,
+            ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             onPressed: () => _openSettings(context),
@@ -78,7 +157,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           setState(() {
             _auditFuture = _securityValidator.runSecurityAudit();
           });
-          context.read<AdminMessagesProvider>().refresh();
+          await _loadStatistics();
+          if (mounted) context.read<AdminMessagesProvider>().refresh();
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -101,6 +181,29 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     },
                   ),
                   const SizedBox(height: 24),
+                  // Date range selector
+                  Row(
+                    children: [
+                      Text(
+                        l10n.dateRangeLabel,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme.onSurfaceVariant,
+                            ),
+                      ),
+                      const SizedBox(width: 12),
+                      FilledButton.tonalIcon(
+                        onPressed: _isLoadingStats
+                            ? null
+                            : () => _pickDateRange(context),
+                        icon: const Icon(Icons.calendar_today, size: 18),
+                        label: Text(dateRangeText),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  _buildStatisticsSection(context, l10n),
+                  const SizedBox(height: 24),
                   Text(
                     l10n.conversationsLabel,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -121,6 +224,69 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         icon: const Icon(Icons.add),
         label: Text(l10n.generateNewCode),
       ),
+    );
+  }
+
+  Widget _buildStatisticsSection(
+      BuildContext context, AppLocalizations l10n) {
+    if (_statisticsFuture == null || _responseTimeFuture == null) {
+      return const SizedBox(
+        height: 120,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+    return FutureBuilder<List<dynamic>>(
+      future: Future.wait([_statisticsFuture!, _responseTimeFuture!]),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            !snapshot.hasData) {
+          return const SizedBox(
+            height: 120,
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (snapshot.hasError) {
+          return Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    color: Theme.of(context).colorScheme.error,
+                    size: 40,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.errorLoading,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  FilledButton.icon(
+                    onPressed: _loadStatistics,
+                    icon: const Icon(Icons.refresh),
+                    label: Text(l10n.retry),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+        final data = snapshot.data!;
+        final stats = data[0] as MessageStatistics;
+        final responseAnalytics = data[1] as ResponseTimeAnalytics;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            StatisticsCards(statistics: stats),
+            const SizedBox(height: 20),
+            MessageTrendChart(dailyData: stats.dailyTrend),
+            const SizedBox(height: 20),
+            ResponseTimeCard(analytics: responseAnalytics),
+          ],
+        );
+      },
     );
   }
 
