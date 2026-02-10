@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/user_role.dart'; // Import the updated User model with UserRole
 
 class AdminSelectionScreen extends StatefulWidget {
@@ -14,9 +15,10 @@ class _AdminSelectionScreenState extends State<AdminSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Admin Selection'),
+        title: Text(l10n.adminSelectionTitle),
       ),
       body: Center(
         child: DropdownButton<UserRole>(

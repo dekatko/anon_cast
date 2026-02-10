@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/rotation_event.dart';
 import '../provider/firestore_provider.dart';
 import '../services/conversation_key_rotation_service.dart';
@@ -195,9 +196,10 @@ class _AdminRotationStatusScreenState extends State<AdminRotationStatusScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Key Rotation'),
+        title: Text(l10n.keyRotationTitle),
         automaticallyImplyLeading: false,
       ),
       body: RefreshIndicator(
@@ -245,7 +247,7 @@ class _AdminRotationStatusScreenState extends State<AdminRotationStatusScreen> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.refresh),
-              label: Text(_rotating ? 'Rotating...' : 'Check & rotate now'),
+              label: Text(_rotating ? l10n.rotatingLabel : l10n.checkAndRotateNow),
             ),
             const SizedBox(height: 16),
             const Text(
@@ -280,9 +282,9 @@ class _AdminRotationStatusScreenState extends State<AdminRotationStatusScreen> {
                     },
                   )),
               if (_status!.conversations.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text('No conversations yet.'),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(l10n.noConversationsYet),
                 ),
               const SizedBox(height: 24),
               const Text(
@@ -364,7 +366,7 @@ class _AdminRotationStatusScreenState extends State<AdminRotationStatusScreen> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.key),
-                label: const Text('Check & rotate E2E keys now'),
+                label: Text(l10n.checkAndRotateE2ENow),
               ),
             ],
           ],
@@ -385,6 +387,7 @@ class _ConversationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
@@ -403,7 +406,7 @@ class _ConversationTile extends StatelessWidget {
         trailing: status.rotationNeeded
             ? TextButton(
                 onPressed: onRotate,
-                child: const Text('Rotate'),
+                child: Text(l10n.rotateButton),
               )
             : null,
       ),
@@ -422,6 +425,7 @@ class _E2EConversationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final daysAgo = result.lastRotatedAt != null
         ? DateTime.now().difference(result.lastRotatedAt!).inDays
         : null;
@@ -435,7 +439,7 @@ class _E2EConversationTile extends StatelessWidget {
         ),
         subtitle: Text(
           'Messages: ${result.messageCount}'
-          '${daysAgo != null ? " · Key rotated $daysAgo days ago" : ""}\n'
+          '${daysAgo != null ? " · ${l10n.keyRotatedDaysAgo(daysAgo)}" : ""}\n'
           '${result.needed ? "⚠ ${result.reason}" : result.reason}',
           maxLines: 3,
           overflow: TextOverflow.ellipsis,
@@ -443,7 +447,7 @@ class _E2EConversationTile extends StatelessWidget {
         trailing: result.needed
             ? TextButton(
                 onPressed: onRotate,
-                child: const Text('Rotate'),
+                child: Text(l10n.rotateButton),
               )
             : null,
       ),

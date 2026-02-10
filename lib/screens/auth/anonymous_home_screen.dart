@@ -78,7 +78,7 @@ class _AnonymousHomeScreenState extends State<AnonymousHomeScreen> {
                 textCapitalization: TextCapitalization.characters,
                 decoration: InputDecoration(
                   labelText: l10n.accessCode,
-                  hintText: 'XXXXXX',
+                  hintText: l10n.accessCodeHint,
                   border: const OutlineInputBorder(),
                 ),
                 validator: (v) {

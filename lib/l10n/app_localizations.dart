@@ -275,6 +275,49 @@ class AppLocalizations {
   String get administratorLogin => _localizedValues[locale.languageCode]?['administratorLogin'] ?? 'Counselor login';
   String get administratorRegister => _localizedValues[locale.languageCode]?['administratorRegister'] ?? 'Counselor registration';
 
+  String get administratorDashboardTitle => _localizedValues[locale.languageCode]?['administratorDashboardTitle'] ?? 'Administrator Dashboard';
+  String get navMessages => _localizedValues[locale.languageCode]?['navMessages'] ?? 'Messages';
+  String get navUsers => _localizedValues[locale.languageCode]?['navUsers'] ?? 'Users';
+  String get navRotation => _localizedValues[locale.languageCode]?['navRotation'] ?? 'Rotation';
+  String get keyRotationTitle => _localizedValues[locale.languageCode]?['keyRotationTitle'] ?? 'Key Rotation';
+  String get noConversationsYet => _localizedValues[locale.languageCode]?['noConversationsYet'] ?? 'No conversations yet.';
+  String get checkAndRotateE2ENow => _localizedValues[locale.languageCode]?['checkAndRotateE2ENow'] ?? 'Check & rotate E2E keys now';
+  String get rotateButton => _localizedValues[locale.languageCode]?['rotateButton'] ?? 'Rotate';
+  String get rotatingLabel => _localizedValues[locale.languageCode]?['rotatingLabel'] ?? 'Rotating…';
+  String get checkAndRotateNow => _localizedValues[locale.languageCode]?['checkAndRotateNow'] ?? 'Check & rotate now';
+  String get systemSettingsTitle => _localizedValues[locale.languageCode]?['systemSettingsTitle'] ?? 'System Settings';
+  String get exportKeysComingSoon => _localizedValues[locale.languageCode]?['exportKeysComingSoon'] ?? 'Export keys: enter password in dialog (coming soon)';
+  String get importKeysComingSoon => _localizedValues[locale.languageCode]?['importKeysComingSoon'] ?? 'Import keys: upload file and enter password (coming soon)';
+  String get auditFailed => _localizedValues[locale.languageCode]?['auditFailed'] ?? 'Audit failed: %s';
+  String get wifiDirect => _localizedValues[locale.languageCode]?['wifiDirect'] ?? 'Wi-Fi Direct';
+  String get externalServer => _localizedValues[locale.languageCode]?['externalServer'] ?? 'External Server';
+  String get localServer => _localizedValues[locale.languageCode]?['localServer'] ?? 'Local Server';
+  String get viewLastReport => _localizedValues[locale.languageCode]?['viewLastReport'] ?? 'View last report';
+  String get runAuditTooltip => _localizedValues[locale.languageCode]?['runAuditTooltip'] ?? 'Run audit';
+  String get exportConversationKeys => _localizedValues[locale.languageCode]?['exportConversationKeys'] ?? 'Export conversation keys';
+  String get exportConversationKeysSubtitle => _localizedValues[locale.languageCode]?['exportConversationKeysSubtitle'] ?? 'Save encrypted keys to a file for use on another device';
+  String get importConversationKeys => _localizedValues[locale.languageCode]?['importConversationKeys'] ?? 'Import conversation keys';
+  String get importConversationKeysSubtitle => _localizedValues[locale.languageCode]?['importConversationKeysSubtitle'] ?? 'Restore keys from a file (e.g. after switching device)';
+  String get securityAuditTitle => _localizedValues[locale.languageCode]?['securityAuditTitle'] ?? 'Security Audit';
+  String get runAgain => _localizedValues[locale.languageCode]?['runAgain'] ?? 'Run again';
+  String get chatRoomTitle => _localizedValues[locale.languageCode]?['chatRoomTitle'] ?? 'Chat Room';
+  String get errorLoadingSession => _localizedValues[locale.languageCode]?['errorLoadingSession'] ?? 'Error loading session';
+  String get activeChatsTitle => _localizedValues[locale.languageCode]?['activeChatsTitle'] ?? 'Active Chats';
+  String get noActiveChats => _localizedValues[locale.languageCode]?['noActiveChats'] ?? 'No Active Chats';
+  String chatWithStudent(String studentId) => (_localizedValues[locale.languageCode]?['chatWithStudent'] ?? 'Chat with %s').replaceAll('%s', studentId);
+  String get filterToday => _localizedValues[locale.languageCode]?['filterToday'] ?? 'Today';
+  String get filterYesterday => _localizedValues[locale.languageCode]?['filterYesterday'] ?? 'Yesterday';
+  String get filterThisWeek => _localizedValues[locale.languageCode]?['filterThisWeek'] ?? 'This week';
+  String get filterClear => _localizedValues[locale.languageCode]?['filterClear'] ?? 'Clear';
+  String get noConversationId => _localizedValues[locale.languageCode]?['noConversationId'] ?? 'No conversation ID';
+  String get nameLabel => _localizedValues[locale.languageCode]?['nameLabel'] ?? 'Name';
+  String get accessCodeHint => _localizedValues[locale.languageCode]?['accessCodeHint'] ?? 'XXXXXX';
+  String get adminSelectionTitle => _localizedValues[locale.languageCode]?['adminSelectionTitle'] ?? 'Admin Selection';
+  String get connectionSettingsTitle => _localizedValues[locale.languageCode]?['connectionSettingsTitle'] ?? 'Connection Settings';
+  String get securityAuditSectionTitle => _localizedValues[locale.languageCode]?['securityAuditSectionTitle'] ?? 'Security audit';
+  String get conversationKeysSectionTitle => _localizedValues[locale.languageCode]?['conversationKeysSectionTitle'] ?? 'Conversation keys (multi-device)';
+  String get verifyEncryptionAndKeyStorage => _localizedValues[locale.languageCode]?['verifyEncryptionAndKeyStorage'] ?? 'Verify encryption and key storage';
+
   /// Resolve auth error message key to localized string.
   String authErrorMessage(String messageKey) {
     return _localizedValues[locale.languageCode]?[messageKey] ??
@@ -419,6 +462,48 @@ class AppLocalizations {
       'register': 'Register',
       'administratorLogin': 'Counselor login',
       'administratorRegister': 'Counselor registration',
+      'administratorDashboardTitle': 'Administrator Dashboard',
+      'navMessages': 'Messages',
+      'navUsers': 'Users',
+      'navRotation': 'Rotation',
+      'keyRotationTitle': 'Key Rotation',
+      'noConversationsYet': 'No conversations yet.',
+      'checkAndRotateE2ENow': 'Check & rotate E2E keys now',
+      'rotateButton': 'Rotate',
+      'rotatingLabel': 'Rotating…',
+      'checkAndRotateNow': 'Check & rotate now',
+      'systemSettingsTitle': 'System Settings',
+      'exportKeysComingSoon': 'Export keys: enter password in dialog (coming soon)',
+      'importKeysComingSoon': 'Import keys: upload file and enter password (coming soon)',
+      'auditFailed': 'Audit failed: %s',
+      'wifiDirect': 'Wi-Fi Direct',
+      'externalServer': 'External Server',
+      'localServer': 'Local Server',
+      'viewLastReport': 'View last report',
+      'runAuditTooltip': 'Run audit',
+      'exportConversationKeys': 'Export conversation keys',
+      'exportConversationKeysSubtitle': 'Save encrypted keys to a file for use on another device',
+      'importConversationKeys': 'Import conversation keys',
+      'importConversationKeysSubtitle': 'Restore keys from a file (e.g. after switching device)',
+      'securityAuditTitle': 'Security Audit',
+      'runAgain': 'Run again',
+      'chatRoomTitle': 'Chat Room',
+      'errorLoadingSession': 'Error loading session',
+      'activeChatsTitle': 'Active Chats',
+      'noActiveChats': 'No Active Chats',
+      'chatWithStudent': 'Chat with %s',
+      'filterToday': 'Today',
+      'filterYesterday': 'Yesterday',
+      'filterThisWeek': 'This week',
+      'filterClear': 'Clear',
+      'noConversationId': 'No conversation ID',
+      'nameLabel': 'Name',
+      'accessCodeHint': 'XXXXXX',
+      'adminSelectionTitle': 'Admin Selection',
+      'connectionSettingsTitle': 'Connection Settings',
+      'securityAuditSectionTitle': 'Security audit',
+      'conversationKeysSectionTitle': 'Conversation keys (multi-device)',
+      'verifyEncryptionAndKeyStorage': 'Verify encryption and key storage',
       'auth_error_email_required': 'Please enter your email.',
       'auth_error_password_required': 'Please enter your password.',
       'auth_error_code_required': 'Please enter your access code.',
@@ -569,6 +654,48 @@ class AppLocalizations {
       'register': 'Registrieren',
       'administratorLogin': 'Berater:in-Anmeldung',
       'administratorRegister': 'Berater:in-Registrierung',
+      'administratorDashboardTitle': 'Administrator-Dashboard',
+      'navMessages': 'Nachrichten',
+      'navUsers': 'Nutzer',
+      'navRotation': 'Rotation',
+      'keyRotationTitle': 'Schlüsselrotation',
+      'noConversationsYet': 'Noch keine Unterhaltungen.',
+      'checkAndRotateE2ENow': 'E2E-Schlüssel jetzt prüfen & rotieren',
+      'rotateButton': 'Rotieren',
+      'rotatingLabel': 'Wird rotiert…',
+      'checkAndRotateNow': 'Jetzt prüfen & rotieren',
+      'systemSettingsTitle': 'Systemeinstellungen',
+      'exportKeysComingSoon': 'Schlüssel exportieren: Passwort im Dialog eingeben (demnächst)',
+      'importKeysComingSoon': 'Schlüssel importieren: Datei hochladen und Passwort eingeben (demnächst)',
+      'auditFailed': 'Prüfung fehlgeschlagen: %s',
+      'wifiDirect': 'WLAN Direct',
+      'externalServer': 'Externer Server',
+      'localServer': 'Lokaler Server',
+      'viewLastReport': 'Letzten Bericht anzeigen',
+      'runAuditTooltip': 'Prüfung ausführen',
+      'exportConversationKeys': 'Konversationsschlüssel exportieren',
+      'exportConversationKeysSubtitle': 'Verschlüsselte Schlüssel in Datei speichern für anderes Gerät',
+      'importConversationKeys': 'Konversationsschlüssel importieren',
+      'importConversationKeysSubtitle': 'Schlüssel aus Datei wiederherstellen (z. B. nach Gerätewechsel)',
+      'securityAuditTitle': 'Sicherheitsprüfung',
+      'runAgain': 'Erneut ausführen',
+      'chatRoomTitle': 'Chatraum',
+      'errorLoadingSession': 'Fehler beim Laden der Sitzung',
+      'activeChatsTitle': 'Aktive Chats',
+      'noActiveChats': 'Keine aktiven Chats',
+      'chatWithStudent': 'Chat mit %s',
+      'filterToday': 'Heute',
+      'filterYesterday': 'Gestern',
+      'filterThisWeek': 'Diese Woche',
+      'filterClear': 'Zurücksetzen',
+      'noConversationId': 'Keine Konversations-ID',
+      'nameLabel': 'Name',
+      'accessCodeHint': 'XXXXXX',
+      'adminSelectionTitle': 'Admin-Auswahl',
+      'connectionSettingsTitle': 'Verbindungseinstellungen',
+      'securityAuditSectionTitle': 'Sicherheitsprüfung',
+      'conversationKeysSectionTitle': 'Konversationsschlüssel (Multi-Gerät)',
+      'verifyEncryptionAndKeyStorage': 'Verschlüsselung und Schlüsselspeicherung prüfen',
       'auth_error_email_required': 'Bitte E-Mail eingeben.',
       'auth_error_password_required': 'Bitte Passwort eingeben.',
       'auth_error_code_required': 'Bitte Zugangscode eingeben.',

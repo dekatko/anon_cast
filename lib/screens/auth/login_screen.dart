@@ -405,7 +405,7 @@ class _AnonymousForm extends StatelessWidget {
             autocorrect: false,
             decoration: InputDecoration(
               labelText: l10n.accessCode,
-              hintText: 'XXXXXX',
+              hintText: l10n.accessCodeHint,
               border: const OutlineInputBorder(),
             ),
             validator: (v) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/security_report.dart';
 import '../services/security_validator.dart';
 import '../services/sync_service.dart';
@@ -27,16 +28,18 @@ class AdministratorSystemSettingsScreenState extends State<AdministratorSystemSe
   void _exportKeys() {
     // TODO: Show dialog to enter password, then call _syncService.exportEncryptedKeys(password),
     // then save to file or copy base64 to clipboard.
+    final l10n = AppLocalizations.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Export keys: enter password in dialog (coming soon)')),
+      SnackBar(content: Text(l10n.exportKeysComingSoon)),
     );
   }
 
   /// Import: pick file (or paste) → prompt password → importEncryptedKeys → keys restored to Hive.
   void _importKeys() {
     // TODO: Show file picker or paste field, then password dialog, then _syncService.importEncryptedKeys(data, password).
+    final l10n = AppLocalizations.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Import keys: upload file and enter password (coming soon)')),
+      SnackBar(content: Text(l10n.importKeysComingSoon)),
     );
   }
 
@@ -63,7 +66,7 @@ class AdministratorSystemSettingsScreenState extends State<AdministratorSystemSe
       if (mounted) {
         setState(() => _auditRunning = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Audit failed: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context).auditFailed.replaceAll('%s', e.toString()))),
         );
       }
     }
@@ -71,9 +74,10 @@ class AdministratorSystemSettingsScreenState extends State<AdministratorSystemSe
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('System Settings'),
+        title: Text(l10n.systemSettingsTitle),
         automaticallyImplyLeading: false,
       ),
       body: Padding(
@@ -81,13 +85,13 @@ class AdministratorSystemSettingsScreenState extends State<AdministratorSystemSe
         child: Column(
           children: [
             // Connection Settings Section
-            const Text(
-              'Connection Settings',
-              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+            Text(
+              l10n.connectionSettingsTitle,
+              style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
             ),
             const Divider(thickness: 1.0),
             ListTile(
-              title: const Text('Wi-Fi Direct'),
+              title: Text(l10n.wifiDirect),
               trailing: Radio<ConnectionType>(
                 value: ConnectionType.wifiDirect,
                 groupValue: _selectedConnectionType,
@@ -95,7 +99,7 @@ class AdministratorSystemSettingsScreenState extends State<AdministratorSystemSe
               ),
             ),
             ListTile(
-              title: const Text('External Server'),
+              title: Text(l10n.externalServer),
               trailing: Radio<ConnectionType>(
                 value: ConnectionType.externalServer,
                 groupValue: _selectedConnectionType,
@@ -103,7 +107,7 @@ class AdministratorSystemSettingsScreenState extends State<AdministratorSystemSe
               ),
             ),
             ListTile(
-              title: const Text('Local Server'),
+              title: Text(l10n.localServer),
               trailing: Radio<ConnectionType>(
                 value: ConnectionType.localServer,
                 groupValue: _selectedConnectionType,
@@ -112,16 +116,16 @@ class AdministratorSystemSettingsScreenState extends State<AdministratorSystemSe
             ),
             const SizedBox(height: 24),
             // Security audit: validate encryption, keys not in Firestore, decryption integrity.
-            const Text(
-              'Security audit',
-              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+            Text(
+              l10n.securityAuditSectionTitle,
+              style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
             ),
             const Divider(thickness: 1.0),
             ListTile(
-              title: const Text('Run security audit'),
+              title: Text(l10n.runSecurityAudit),
               subtitle: Text(
                 _lastSecurityReport == null
-                    ? 'Verify encryption and key storage'
+                    ? l10n.verifyEncryptionAndKeyStorage
                     : 'Last run: ${DateFormat.yMd().add_Hm().format(_lastSecurityReport!.timestamp)} — '
                         '${_lastSecurityReport!.allPassed ? "Passed" : "Failed"}',
               ),
@@ -146,7 +150,7 @@ class AdministratorSystemSettingsScreenState extends State<AdministratorSystemSe
                   : IconButton(
                       icon: const Icon(Icons.play_arrow),
                       onPressed: _runSecurityAudit,
-                      tooltip: 'Run audit',
+                      tooltip: l10n.runAuditTooltip,
                     ),
               onTap: _auditRunning ? null : _runSecurityAudit,
             ),
@@ -163,26 +167,26 @@ class AdministratorSystemSettingsScreenState extends State<AdministratorSystemSe
                     ),
                   ),
                   icon: const Icon(Icons.list),
-                  label: const Text('View last report'),
+                  label: Text(l10n.viewLastReport),
                 ),
               ),
             const SizedBox(height: 24),
             // Key backup for multi-device: export/import conversation keys (password-encrypted).
             // UI flow: Export → user enters password → file downloads. Import → upload file → enter password → keys restored.
-            const Text(
-              'Conversation keys (multi-device)',
-              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+            Text(
+              l10n.conversationKeysSectionTitle,
+              style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
             ),
             const Divider(thickness: 1.0),
             ListTile(
-              title: const Text('Export conversation keys'),
-              subtitle: const Text('Save encrypted keys to a file for use on another device'),
+              title: Text(l10n.exportConversationKeys),
+              subtitle: Text(l10n.exportConversationKeysSubtitle),
               leading: const Icon(Icons.upload_file),
               onTap: _exportKeys,
             ),
             ListTile(
-              title: const Text('Import conversation keys'),
-              subtitle: const Text('Restore keys from a file (e.g. after switching device)'),
+              title: Text(l10n.importConversationKeys),
+              subtitle: Text(l10n.importConversationKeysSubtitle),
               leading: const Icon(Icons.download),
               onTap: _importKeys,
             ),

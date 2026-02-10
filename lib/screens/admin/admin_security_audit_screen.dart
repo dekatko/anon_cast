@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../models/security_report.dart';
 
 /// Displays security audit results: validation checks, warnings, recommendations.
@@ -16,15 +17,16 @@ class AdminSecurityAuditScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final dateFormat = DateFormat.yMd().add_Hm();
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Security Audit'),
+        title: Text(l10n.securityAuditTitle),
         actions: [
           if (onRunAgain != null)
             TextButton(
               onPressed: onRunAgain,
-              child: const Text('Run again'),
+              child: Text(l10n.runAgain),
             ),
         ],
       ),

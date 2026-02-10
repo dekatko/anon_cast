@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/chat_session.dart';
 import '../provider/offline_provider.dart';
 import '../widgets/offline_banner.dart';
@@ -26,6 +27,7 @@ class _AdministratorDashboardScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final screens = [
       const AdminDashboardScreen(),
       const UserManagementScreen(),
@@ -35,7 +37,7 @@ class _AdministratorDashboardScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Administrator Dashboard'),
+        title: Text(l10n.administratorDashboardTitle),
       ),
       body: Column(
         children: [
@@ -58,22 +60,22 @@ class _AdministratorDashboardScreenState
         type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.inbox),
-            label: 'Messages',
+            icon: const Icon(Icons.inbox),
+            label: l10n.navMessages,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.people),
-            label: 'Users',
+            icon: const Icon(Icons.people),
+            label: l10n.navUsers,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.security),
-            label: 'Rotation',
+            icon: const Icon(Icons.security),
+            label: l10n.navRotation,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
+            icon: const Icon(Icons.settings),
+            label: l10n.settingsLabel,
           ),
         ],
       ),

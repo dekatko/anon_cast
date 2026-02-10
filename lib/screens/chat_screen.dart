@@ -6,6 +6,7 @@ import 'package:pointycastle/api.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/chat_message.dart';
 import '../models/chat_session.dart';
 import '../provider/chat_session_provider.dart';
@@ -47,13 +48,13 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-
+    final l10n = AppLocalizations.of(context);
     final auth = context.read<AuthService>();
     final isAnonymous = auth.currentUser?.isAnonymous ?? false;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chat Room'),
+        title: Text(l10n.chatRoomTitle),
         actions: [
           if (isAnonymous)
             IconButton(
@@ -87,7 +88,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     Expanded(
                       child: TextField(
                         controller: _messageController,
-                        decoration: const InputDecoration(hintText: "Enter message"),
+                        decoration: InputDecoration(hintText: l10n.typeMessageHint),
                       ),
                     ),
                     IconButton(
@@ -99,7 +100,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ],
             );
           } else if (snapshot.hasError) {
-            return const Center(child: Text('Error loading session'));
+            return Center(child: Text(l10n.errorLoadingSession));
           } else {
             return const Center(child: CircularProgressIndicator());
           }

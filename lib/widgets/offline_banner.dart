@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 /// Full offline banner: shows offline state, optional syncing state, and retry for failed syncs.
 class OfflineBanner extends StatelessWidget {
   const OfflineBanner({
@@ -24,6 +26,7 @@ class OfflineBanner extends StatelessWidget {
     if (!isOffline && !isSyncing && failedCount == 0) return const SizedBox.shrink();
 
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     if (isOffline) {
       return Material(
@@ -73,7 +76,7 @@ class OfflineBanner extends StatelessWidget {
                 if (onRetry != null)
                   TextButton(
                     onPressed: onRetry,
-                    child: Text('Retry', style: TextStyle(color: theme.colorScheme.onErrorContainer)),
+                    child: Text(l10n.retry, style: TextStyle(color: theme.colorScheme.onErrorContainer)),
                   ),
               ],
             ),

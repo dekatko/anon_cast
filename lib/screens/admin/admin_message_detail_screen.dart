@@ -126,7 +126,7 @@ class AdminMessageDetailScreen extends StatelessWidget {
                         final cid = message.conversationId;
                         if (cid.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('No conversation ID')),
+                            SnackBar(content: Text(l10n.noConversationId)),
                           );
                           return;
                         }

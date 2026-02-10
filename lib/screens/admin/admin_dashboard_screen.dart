@@ -252,7 +252,7 @@ class SecurityStatusCard extends StatelessWidget {
                 children: [
                   ListTile(
                     leading: Icon(Icons.warning, color: Theme.of(context).colorScheme.error),
-                    title: const Text('Security check failed'),
+                    title: Text(l10n.securityCheckFailed),
                     subtitle: Text('${snapshot.error}'),
                   ),
                   if (onRunAgain != null)

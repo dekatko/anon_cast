@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/chat_session.dart';
 
 class AdministratorChatDashboardScreen extends StatefulWidget {
@@ -16,9 +17,10 @@ class _AdministratorChatDashboardScreenState extends State<AdministratorChatDash
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Active Chats'),
+        title: Text(l10n.activeChatsTitle),
         automaticallyImplyLeading: false, //Remove back button next to Active Chats
       ),
       body: Padding(
@@ -28,7 +30,7 @@ class _AdministratorChatDashboardScreenState extends State<AdministratorChatDash
           builder: (context, box, child) {
             final chatSessions = box.values.toList();
             if (chatSessions.isEmpty) {
-              return const Center(child: Text('No Active Chats'));
+              return Center(child: Text(l10n.noActiveChats));
             }
             return ListView.builder(
               itemCount: chatSessions.length,
@@ -39,7 +41,7 @@ class _AdministratorChatDashboardScreenState extends State<AdministratorChatDash
 
                 return Card(
                   child: ListTile(
-                    title: Text('Chat with ${chatSession.studentId}'),
+                    title: Text(l10n.chatWithStudent(chatSession.studentId)),
                     subtitle: Text('$truncatedMessage...'),
                     onTap: () => // Handle chat session tap (e.g., navigate to chat details)
                     print('Navigate to chat details for ${chatSession.id}'),

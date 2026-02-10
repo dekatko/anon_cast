@@ -211,19 +211,19 @@ class _DateFilterChips extends StatelessWidget {
           runSpacing: 4,
           children: [
             ActionChip(
-              label: const Text('Today'),
+              label: Text(l10n.filterToday),
               onPressed: () => provider.setDateRange(today, now),
             ),
             ActionChip(
-              label: const Text('Yesterday'),
+              label: Text(l10n.filterYesterday),
               onPressed: () => provider.setDateRange(yesterday, yesterday),
             ),
             ActionChip(
-              label: const Text('This week'),
+              label: Text(l10n.filterThisWeek),
               onPressed: () => provider.setDateRange(weekStart, now),
             ),
             ActionChip(
-              label: const Text('Clear'),
+              label: Text(l10n.filterClear),
               onPressed: () => provider.setDateRange(null, null),
             ),
           ],

@@ -59,9 +59,9 @@ class _AdministratorRegisterScreenState extends State<AdministratorRegisterScree
             TextFormField(
               controller: _nameController,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                labelText: 'Name',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.nameLabel,
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
