@@ -62,6 +62,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   DateTime _endDate = DateTime.now();
   bool _isLoadingStats = false;
   bool _isExportingPdf = false;
+  DateTime? _lastStatsUpdated;
 
   @override
   void initState() {
@@ -76,7 +77,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     });
   }
 
-  Future<void> _loadStatistics() async {
+  Future<void> _loadStatistics({bool forceRefresh = false}) async {
     final organizationId =
         FirebaseAuth.instance.currentUser?.uid ?? 'default';
     setState(() => _isLoadingStats = true);
@@ -84,13 +85,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       organizationId: organizationId,
       startDate: _startDate,
       endDate: _endDate,
-      bypassCache: true,
+      bypassCache: forceRefresh,
     );
     final responseFuture = _reportingService.getResponseTimeAnalytics(
       organizationId: organizationId,
       startDate: _startDate,
       endDate: _endDate,
-      bypassCache: true,
+      bypassCache: forceRefresh,
     );
     setState(() {
       _statisticsFuture = statsFuture;
@@ -98,6 +99,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     });
     try {
       await Future.wait([statsFuture, responseFuture]);
+      if (mounted) setState(() => _lastStatsUpdated = DateTime.now());
     } catch (_) {
       // Futures already hold error; FutureBuilder will show it
     } finally {
@@ -229,7 +231,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     },
                   ),
                   const SizedBox(height: 24),
-                  // Date range selector
+                  // Date range selector and force refresh
                   Row(
                     children: [
                       Text(
@@ -247,8 +249,27 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         icon: const Icon(Icons.calendar_today, size: 18),
                         label: Text(dateRangeText),
                       ),
+                      const SizedBox(width: 12),
+                      IconButton(
+                        onPressed: _isLoadingStats
+                            ? null
+                            : () => _loadStatistics(forceRefresh: true),
+                        icon: const Icon(Icons.refresh),
+                        tooltip: l10n.forceRefresh,
+                      ),
                     ],
                   ),
+                  if (_lastStatsUpdated != null) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      l10n.lastUpdatedMinutesAgo(
+                        DateTime.now().difference(_lastStatsUpdated!).inMinutes.clamp(0, 999),
+                      ),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ],
                   const SizedBox(height: 20),
                   _buildStatisticsSection(context, l10n),
                   const SizedBox(height: 24),

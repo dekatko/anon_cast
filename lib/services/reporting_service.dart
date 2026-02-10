@@ -3,12 +3,10 @@ import 'package:logger/logger.dart';
 
 import '../models/message_statistics.dart';
 import '../models/response_time_analytics.dart';
+import 'report_cache_service.dart';
 
 /// Firestore whereIn limit (max 10 values per query).
 const int _whereInLimit = 10;
-
-/// In-memory cache expiry for reporting data.
-const Duration _cacheExpiry = Duration(minutes: 5);
 
 /// Lightweight message metadata for reporting (no content; zero-knowledge).
 class _MessageMeta {
@@ -38,17 +36,17 @@ class ReportingService {
   ReportingService({
     FirebaseFirestore? firestore,
     Logger? logger,
+    ReportCacheService? reportCache,
   })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _log = logger ?? Logger();
+        _log = logger ?? Logger(),
+        _reportCache = reportCache ?? ReportCacheService(logger: logger);
 
   final FirebaseFirestore _firestore;
   final Logger _log;
+  final ReportCacheService _reportCache;
 
   static const String _conversationsCollection = 'conversations';
   static const String _messagesCollection = 'messages';
-
-  final Map<String, _CacheEntry<MessageStatistics>> _statsCache = {};
-  final Map<String, _CacheEntry<ResponseTimeAnalytics>> _responseCache = {};
 
   /// Message statistics for [organizationId] between [startDate] and [endDate].
   /// Returns [MessageStatistics.empty] on error or when no data.
@@ -61,11 +59,12 @@ class ReportingService {
     final end = endDate ?? DateTime.now();
     final start = startDate ?? end.subtract(const Duration(days: 7));
     final cacheKey = '${organizationId}_${start.millisecondsSinceEpoch}_${end.millisecondsSinceEpoch}';
+
     if (!bypassCache) {
-      final cached = _statsCache[cacheKey];
-      if (cached != null && !cached.isExpired) {
-        _log.d('ReportingService: message statistics cache hit');
-        return cached.value;
+      final cached = _reportCache.getCachedStatistics(cacheKey);
+      if (cached != null) {
+        _log.d('ReportingService: getMessageStatistics cache hit (returned <1ms)');
+        return cached;
       }
     }
 
@@ -73,11 +72,10 @@ class ReportingService {
     try {
       final conversationIds = await _getConversationIdsForOrganization(organizationId);
       if (conversationIds.isEmpty) {
-        _log.d('ReportingService: no conversations for org');
         stopwatch.stop();
-        _log.d('ReportingService: getMessageStatistics took ${stopwatch.elapsedMilliseconds}ms');
+        _log.d('ReportingService: getMessageStatistics took ${stopwatch.elapsedMilliseconds}ms (no conversations)');
         final empty = MessageStatistics.empty();
-        _statsCache[cacheKey] = _CacheEntry(empty, DateTime.now());
+        _reportCache.cacheStatistics(cacheKey, empty);
         return empty;
       }
 
@@ -86,8 +84,12 @@ class ReportingService {
         start,
         end,
       );
-      stopwatch.stop();
-      _log.d('ReportingService: fetched ${messages.length} messages in ${stopwatch.elapsedMilliseconds}ms');
+      final queryMs = stopwatch.elapsedMilliseconds;
+      if (queryMs > 2000) {
+        _log.w('ReportingService: slow query getMessageStatistics took ${queryMs}ms for ${messages.length} messages');
+      } else {
+        _log.d('ReportingService: getMessageStatistics took ${queryMs}ms (${messages.length} messages)');
+      }
 
       final totalMessageCount = messages.length;
       final messagesByStatus = <String, int>{'unread': 0, 'read': 0, 'resolved': 0};
@@ -112,11 +114,11 @@ class ReportingService {
         periodStart: start,
         periodEnd: end,
       );
-      _statsCache[cacheKey] = _CacheEntry(result, DateTime.now());
+      _reportCache.cacheStatistics(cacheKey, result);
       return result;
     } catch (e, st) {
       stopwatch.stop();
-      _log.e('ReportingService: getMessageStatistics failed', error: e, stackTrace: st);
+      _log.e('ReportingService: getMessageStatistics failed after ${stopwatch.elapsedMilliseconds}ms', error: e, stackTrace: st);
       return MessageStatistics.empty();
     }
   }
@@ -132,11 +134,12 @@ class ReportingService {
     final end = endDate ?? DateTime.now();
     final start = startDate ?? end.subtract(const Duration(days: 7));
     final cacheKey = '${organizationId}_${start.millisecondsSinceEpoch}_${end.millisecondsSinceEpoch}';
+
     if (!bypassCache) {
-      final cached = _responseCache[cacheKey];
-      if (cached != null && !cached.isExpired) {
-        _log.d('ReportingService: response time analytics cache hit');
-        return cached.value;
+      final cached = _reportCache.getCachedResponseTime(cacheKey);
+      if (cached != null) {
+        _log.d('ReportingService: getResponseTimeAnalytics cache hit (returned <1ms)');
+        return cached;
       }
     }
 
@@ -147,13 +150,17 @@ class ReportingService {
         stopwatch.stop();
         _log.d('ReportingService: getResponseTimeAnalytics took ${stopwatch.elapsedMilliseconds}ms (no convos)');
         final empty = ResponseTimeAnalytics.empty();
-        _responseCache[cacheKey] = _CacheEntry(empty, DateTime.now());
+        _reportCache.cacheResponseTime(cacheKey, empty);
         return empty;
       }
 
       final messages = await _getMessagesForConversationsInRange(conversationIds, start, end);
-      stopwatch.stop();
-      _log.d('ReportingService: response time computed from ${messages.length} messages in ${stopwatch.elapsedMilliseconds}ms');
+      final queryMs = stopwatch.elapsedMilliseconds;
+      if (queryMs > 2000) {
+        _log.w('ReportingService: slow query getResponseTimeAnalytics took ${queryMs}ms for ${messages.length} messages');
+      } else {
+        _log.d('ReportingService: getResponseTimeAnalytics took ${queryMs}ms (${messages.length} messages)');
+      }
 
       final byConversation = <String, List<_MessageMeta>>{};
       for (final m in messages) {
@@ -174,12 +181,10 @@ class ReportingService {
         final list = entry.value;
         bool firstResponseRecorded = false;
         _MessageMeta? lastAnonymous;
-        String? lastAdminId;
         for (final m in list) {
           if (m.isFromAnonymous) {
             totalAnonymousMessages++;
             lastAnonymous = m;
-            lastAdminId = null;
           } else if (m.isFromAdmin) {
             if (lastAnonymous != null) {
               final duration = m.timestamp.difference(lastAnonymous.timestamp);
@@ -194,7 +199,6 @@ class ReportingService {
               adminConversations.putIfAbsent(aid, () => {}).add(entry.key);
               adminMessageCount[aid] = (adminMessageCount[aid] ?? 0) + 1;
             }
-            lastAdminId = m.senderId;
             lastAnonymous = null;
           }
         }
@@ -253,11 +257,11 @@ class ReportingService {
         totalResponsesCount: totalResponsesCount,
         adminPerformanceList: adminPerformanceList,
       );
-      _responseCache[cacheKey] = _CacheEntry(result, DateTime.now());
+      _reportCache.cacheResponseTime(cacheKey, result);
       return result;
     } catch (e, st) {
       stopwatch.stop();
-      _log.e('ReportingService: getResponseTimeAnalytics failed', error: e, stackTrace: st);
+      _log.e('ReportingService: getResponseTimeAnalytics failed after ${stopwatch.elapsedMilliseconds}ms', error: e, stackTrace: st);
       return ResponseTimeAnalytics.empty();
     }
   }
@@ -370,17 +374,6 @@ class ReportingService {
 
   /// Clears in-memory caches (e.g. after org switch or for testing).
   void clearCache() {
-    _statsCache.clear();
-    _responseCache.clear();
-    _log.d('ReportingService: cache cleared');
+    _reportCache.clearCache();
   }
-}
-
-class _CacheEntry<T> {
-  _CacheEntry(this.value, this.createdAt);
-
-  final T value;
-  final DateTime createdAt;
-
-  bool get isExpired => DateTime.now().difference(createdAt) > _cacheExpiry;
 }

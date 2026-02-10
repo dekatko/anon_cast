@@ -335,6 +335,10 @@ class AppLocalizations {
   String get exportPdfTooltip => _localizedValues[locale.languageCode]?['exportPdfTooltip'] ?? 'Export as PDF';
   String get exportSuccess => _localizedValues[locale.languageCode]?['exportSuccess'] ?? 'Report exported';
   String get exportError => _localizedValues[locale.languageCode]?['exportError'] ?? 'Export failed';
+  String get lastUpdated => _localizedValues[locale.languageCode]?['lastUpdated'] ?? 'Last updated';
+  String lastUpdatedMinutesAgo(int minutes) =>
+      (_localizedValues[locale.languageCode]?['lastUpdatedMinutesAgo'] ?? 'Last updated: %s min ago').replaceFirst('%s', '$minutes');
+  String get forceRefresh => _localizedValues[locale.languageCode]?['forceRefresh'] ?? 'Force refresh';
 
   /// Resolve auth error message key to localized string.
   String authErrorMessage(String messageKey) {
@@ -536,6 +540,9 @@ class AppLocalizations {
       'exportPdfTooltip': 'Export as PDF',
       'exportSuccess': 'Report exported',
       'exportError': 'Export failed',
+      'lastUpdated': 'Last updated',
+      'lastUpdatedMinutesAgo': 'Last updated: %s min ago',
+      'forceRefresh': 'Force refresh',
       'auth_error_email_required': 'Please enter your email.',
       'auth_error_password_required': 'Please enter your password.',
       'auth_error_code_required': 'Please enter your access code.',
@@ -742,6 +749,9 @@ class AppLocalizations {
       'exportPdfTooltip': 'Als PDF exportieren',
       'exportSuccess': 'Bericht exportiert',
       'exportError': 'Export fehlgeschlagen',
+      'lastUpdated': 'Aktualisiert',
+      'lastUpdatedMinutesAgo': 'Aktualisiert vor %s Min.',
+      'forceRefresh': 'Aktualisieren',
       'auth_error_email_required': 'Bitte E-Mail eingeben.',
       'auth_error_password_required': 'Bitte Passwort eingeben.',
       'auth_error_code_required': 'Bitte Zugangscode eingeben.',
