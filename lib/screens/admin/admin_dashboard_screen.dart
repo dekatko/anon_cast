@@ -15,6 +15,7 @@ import '../../provider/admin_messages_provider.dart';
 import '../../provider/firestore_provider.dart';
 import '../../services/access_code_service.dart';
 import '../../services/local_storage_service.dart';
+import '../../services/pdf_export_service.dart';
 import '../../services/reporting_service.dart';
 import '../../services/security_validator.dart';
 import '../../widgets/message_trend_chart.dart';
@@ -60,6 +61,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   DateTime _startDate = DateTime.now().subtract(const Duration(days: 7));
   DateTime _endDate = DateTime.now();
   bool _isLoadingStats = false;
+  bool _isExportingPdf = false;
 
   @override
   void initState() {
@@ -121,6 +123,51 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     }
   }
 
+  Future<void> _exportPdfReport(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    if (_statisticsFuture == null || _responseTimeFuture == null) return;
+    setState(() => _isExportingPdf = true);
+    try {
+      final stats = await _statisticsFuture!;
+      final responseTime = await _responseTimeFuture!;
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      String organizationName = 'Unbekannt';
+      if (uid != null && uid.isNotEmpty) {
+        final admin = await context.read<FirestoreProvider>().getAdministrator(uid);
+        if (admin != null) {
+          organizationName = admin.name ?? admin.email;
+        }
+      }
+      final pdfService = PdfExportService();
+      final pdfData = await pdfService.exportStatisticsReport(
+        stats: stats,
+        responseTime: responseTime,
+        organizationName: organizationName,
+        startDate: _startDate,
+        endDate: _endDate,
+      );
+      final filename =
+          'anoncast_bericht_${DateFormat('yyyy-MM-dd').format(DateTime.now())}.pdf';
+      await pdfService.shareOrPrintPDF(pdfData, filename);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.exportSuccess)),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${l10n.exportError}: $e'),
+            backgroundColor: Theme.of(context).colorScheme.errorContainer,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isExportingPdf = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -136,13 +183,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         actions: [
           if (_statisticsFuture != null)
             IconButton(
-              icon: const Icon(Icons.picture_as_pdf_outlined),
-              onPressed: () {
-                // Placeholder: PDF export to be implemented
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(l10n.exportPdfTooltip)),
-                );
-              },
+              icon: _isExportingPdf
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.picture_as_pdf_outlined),
+              onPressed: _isExportingPdf ? null : () => _exportPdfReport(context),
               tooltip: l10n.exportPdfTooltip,
             ),
           IconButton(

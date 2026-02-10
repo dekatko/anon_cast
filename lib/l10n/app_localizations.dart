@@ -333,6 +333,8 @@ class AppLocalizations {
 
   String get dateRangeLabel => _localizedValues[locale.languageCode]?['dateRangeLabel'] ?? 'Period:';
   String get exportPdfTooltip => _localizedValues[locale.languageCode]?['exportPdfTooltip'] ?? 'Export as PDF';
+  String get exportSuccess => _localizedValues[locale.languageCode]?['exportSuccess'] ?? 'Report exported';
+  String get exportError => _localizedValues[locale.languageCode]?['exportError'] ?? 'Export failed';
 
   /// Resolve auth error message key to localized string.
   String authErrorMessage(String messageKey) {
@@ -532,6 +534,8 @@ class AppLocalizations {
       'responseTimes': 'Response times',
       'dateRangeLabel': 'Period:',
       'exportPdfTooltip': 'Export as PDF',
+      'exportSuccess': 'Report exported',
+      'exportError': 'Export failed',
       'auth_error_email_required': 'Please enter your email.',
       'auth_error_password_required': 'Please enter your password.',
       'auth_error_code_required': 'Please enter your access code.',
@@ -736,6 +740,8 @@ class AppLocalizations {
       'responseTimes': 'Antwortzeiten',
       'dateRangeLabel': 'Zeitraum:',
       'exportPdfTooltip': 'Als PDF exportieren',
+      'exportSuccess': 'Bericht exportiert',
+      'exportError': 'Export fehlgeschlagen',
       'auth_error_email_required': 'Bitte E-Mail eingeben.',
       'auth_error_password_required': 'Bitte Passwort eingeben.',
       'auth_error_code_required': 'Bitte Zugangscode eingeben.',
