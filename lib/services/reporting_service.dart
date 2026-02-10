@@ -429,6 +429,99 @@ class ReportingService {
     );
   }
 
+  /// Admin performance leaderboard (or single admin if [adminId] provided).
+  /// Sorted by performance: faster response time first, then more messages.
+  Future<List<AdminPerformance>> getAdminPerformance({
+    required String organizationId,
+    DateTime? startDate,
+    DateTime? endDate,
+    String? adminId,
+    bool bypassCache = false,
+  }) async {
+    final end = endDate ?? DateTime.now();
+    final start = startDate ?? end.subtract(const Duration(days: 7));
+    final conversationIds = await _getConversationIdsForOrganization(organizationId);
+    if (conversationIds.isEmpty) return [];
+
+    final messages = await _getMessagesForConversationsInRange(conversationIds, start, end);
+    final byConversation = <String, List<_MessageMeta>>{};
+    for (final m in messages) {
+      byConversation.putIfAbsent(m.conversationId, () => []).add(m);
+    }
+    for (final list in byConversation.values) {
+      list.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+    }
+
+    final adminMessages = <String, int>{};
+    final adminConversations = <String, Set<String>>{};
+    final adminResponseDurations = <String, List<Duration>>{};
+    final adminFirstResponseDurations = <String, List<Duration>>{};
+    final adminLastActive = <String, DateTime>{};
+
+    for (final entry in byConversation.entries) {
+      final list = entry.value;
+      _MessageMeta? lastAnonymous;
+      bool firstResponseRecorded = false;
+      for (final m in list) {
+        if (m.isFromAnonymous) {
+          lastAnonymous = m;
+        } else if (m.isFromAdmin) {
+          final aid = m.senderId;
+          adminMessages[aid] = (adminMessages[aid] ?? 0) + 1;
+          adminConversations[aid] ??= {};
+          adminConversations[aid]!.add(entry.key);
+          if (m.timestamp.isAfter(adminLastActive[aid] ?? DateTime(0))) {
+            adminLastActive[aid] = m.timestamp;
+          }
+          if (lastAnonymous != null) {
+            final duration = m.timestamp.difference(lastAnonymous.timestamp);
+            if (!duration.isNegative) {
+              adminResponseDurations.putIfAbsent(aid, () => []).add(duration);
+              if (!firstResponseRecorded) {
+                adminFirstResponseDurations.putIfAbsent(aid, () => []).add(duration);
+                firstResponseRecorded = true;
+              }
+            }
+          }
+          lastAnonymous = null;
+        }
+      }
+    }
+
+    final list = <AdminPerformance>[];
+    final adminIds = adminMessages.keys.toSet();
+    for (final aid in adminIds) {
+      if (adminId != null && aid != adminId) continue;
+      final durations = adminResponseDurations[aid] ?? [];
+      final firstDurations = adminFirstResponseDurations[aid] ?? [];
+      final avgResponse = durations.isEmpty
+          ? Duration.zero
+          : Duration(milliseconds: (durations.map((d) => d.inMilliseconds).reduce((a, b) => a + b) / durations.length).round());
+      final avgFirst = firstDurations.isEmpty
+          ? null
+          : Duration(milliseconds: (firstDurations.map((d) => d.inMilliseconds).reduce((a, b) => a + b) / firstDurations.length).round());
+      final convos = adminConversations[aid]?.length ?? 0;
+      final completed = convos; // All handled count as "participated"; no resolved flag in messages
+      final completionRate = convos > 0 ? (completed / convos * 100) : 0.0;
+      list.add(AdminPerformance(
+        adminId: aid,
+        adminName: aid,
+        conversationsHandled: convos,
+        messagesSent: adminMessages[aid] ?? 0,
+        averageResponseTime: avgResponse,
+        averageFirstResponseTime: avgFirst,
+        lastActive: adminLastActive[aid],
+        conversationCompletionRate: completionRate,
+      ));
+    }
+
+    list.sort(AdminPerformance.compareByPerformance);
+    for (var i = 0; i < list.length; i++) {
+      list[i] = list[i].copyWith(rank: i + 1);
+    }
+    return list;
+  }
+
   /// Clears in-memory caches (e.g. after org switch or for testing).
   void clearCache() {
     _reportCache.clearCache();

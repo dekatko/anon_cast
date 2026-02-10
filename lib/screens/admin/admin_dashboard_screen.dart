@@ -22,6 +22,7 @@ import '../../services/security_validator.dart';
 import '../../widgets/message_trend_chart.dart';
 import '../../widgets/response_time_card.dart';
 import '../../widgets/statistics_cards.dart';
+import 'admin_performance_screen.dart';
 import 'admin_security_audit_screen.dart';
 import '../messages/message_thread_screen.dart';
 import '../settings/settings_screen.dart';
@@ -220,6 +221,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       appBar: AppBar(
         title: Text(l10n.adminDashboardTitle),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.leaderboard_outlined),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (context) => AdminPerformanceScreen(
+                  initialStart: _startDate,
+                  initialEnd: _endDate,
+                ),
+              ),
+            ),
+            tooltip: l10n.leaderboard,
+          ),
           if (_statisticsFuture != null)
             IconButton(
               icon: _isExportingPdf
@@ -428,6 +441,20 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             MessageTrendChart(dailyData: stats.dailyTrend),
             const SizedBox(height: 20),
             ResponseTimeCard(analytics: responseAnalytics),
+            if (responseAnalytics.adminPerformanceList.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              _TopPerformerSummary(
+                admins: responseAnalytics.adminPerformanceList,
+                onTapLeaderboard: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (context) => AdminPerformanceScreen(
+                      initialStart: _startDate,
+                      initialEnd: _endDate,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ],
         );
       },
@@ -518,6 +545,72 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             child: Text(l10n.cancel),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Compact top-performer row with link to full leaderboard.
+class _TopPerformerSummary extends StatelessWidget {
+  const _TopPerformerSummary({
+    required this.admins,
+    required this.onTapLeaderboard,
+  });
+
+  final List<AdminPerformance> admins;
+  final VoidCallback onTapLeaderboard;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final sorted = List<AdminPerformance>.from(admins)
+      ..sort(AdminPerformance.compareByPerformance);
+    final top = sorted.isNotEmpty ? sorted.first : null;
+    if (top == null) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    return Card(
+      child: InkWell(
+        onTap: onTapLeaderboard,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              Icon(Icons.emoji_events, color: Colors.amber.shade700, size: 28),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      l10n.topPerformer,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    Text(
+                      top.adminName.isNotEmpty ? top.adminName : top.adminId,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                l10n.leaderboard,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Icon(Icons.chevron_right, color: theme.colorScheme.primary, size: 20),
+            ],
+          ),
+        ),
       ),
     );
   }

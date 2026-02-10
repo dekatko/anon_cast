@@ -6,6 +6,11 @@ class AdminPerformance {
     required this.conversationsHandled,
     required this.messagesSent,
     required this.averageResponseTime,
+    this.rank,
+    this.averageFirstResponseTime,
+    this.lastActive,
+    this.conversationCompletionRate,
+    this.averageRating,
   });
 
   final String adminId;
@@ -14,6 +19,57 @@ class AdminPerformance {
   final int messagesSent;
   /// Average time to respond in conversations.
   final Duration averageResponseTime;
+  /// 1-based rank in leaderboard (optional).
+  final int? rank;
+  /// Average first response time in conversations this admin replied to.
+  final Duration? averageFirstResponseTime;
+  /// Last time this admin sent a message.
+  final DateTime? lastActive;
+  /// Share of handled conversations that received a reply (0–100).
+  final double? conversationCompletionRate;
+  /// Placeholder for future rating (e.g. 0–5).
+  final double? averageRating;
+
+  AdminPerformance copyWith({
+    String? adminId,
+    String? adminName,
+    int? conversationsHandled,
+    int? messagesSent,
+    Duration? averageResponseTime,
+    int? rank,
+    Duration? averageFirstResponseTime,
+    DateTime? lastActive,
+    double? conversationCompletionRate,
+    double? averageRating,
+  }) {
+    return AdminPerformance(
+      adminId: adminId ?? this.adminId,
+      adminName: adminName ?? this.adminName,
+      conversationsHandled: conversationsHandled ?? this.conversationsHandled,
+      messagesSent: messagesSent ?? this.messagesSent,
+      averageResponseTime: averageResponseTime ?? this.averageResponseTime,
+      rank: rank ?? this.rank,
+      averageFirstResponseTime: averageFirstResponseTime ?? this.averageFirstResponseTime,
+      lastActive: lastActive ?? this.lastActive,
+      conversationCompletionRate: conversationCompletionRate ?? this.conversationCompletionRate,
+      averageRating: averageRating ?? this.averageRating,
+    );
+  }
+
+  /// Sort by performance: faster average response first, then more messages.
+  static int compareByPerformance(AdminPerformance a, AdminPerformance b) {
+    final byTime = a.averageResponseTime.inMilliseconds.compareTo(b.averageResponseTime.inMilliseconds);
+    if (byTime != 0) return byTime;
+    return b.messagesSent.compareTo(a.messagesSent);
+  }
+
+  /// Sort by messages sent descending.
+  static int compareByMessagesSent(AdminPerformance a, AdminPerformance b) =>
+      b.messagesSent.compareTo(a.messagesSent);
+
+  /// Sort by conversations handled descending.
+  static int compareByConversationsHandled(AdminPerformance a, AdminPerformance b) =>
+      b.conversationsHandled.compareTo(a.conversationsHandled);
 
   Map<String, dynamic> toJson() => {
         'adminId': adminId,
@@ -21,16 +77,31 @@ class AdminPerformance {
         'conversationsHandled': conversationsHandled,
         'messagesSent': messagesSent,
         'averageResponseTimeMillis': averageResponseTime.inMilliseconds,
+        if (rank != null) 'rank': rank,
+        if (averageFirstResponseTime != null) 'averageFirstResponseTimeMillis': averageFirstResponseTime!.inMilliseconds,
+        if (lastActive != null) 'lastActive': lastActive!.toIso8601String(),
+        if (conversationCompletionRate != null) 'conversationCompletionRate': conversationCompletionRate,
+        if (averageRating != null) 'averageRating': averageRating,
       };
 
   factory AdminPerformance.fromJson(Map<String, dynamic> json) {
     final ms = (json['averageResponseTimeMillis'] as num?)?.toInt();
+    final firstMs = (json['averageFirstResponseTimeMillis'] as num?)?.toInt();
+    final lastActiveRaw = json['lastActive'];
+    DateTime? lastActive;
+    if (lastActiveRaw is String) lastActive = DateTime.tryParse(lastActiveRaw);
+    if (lastActiveRaw is int) lastActive = DateTime.fromMillisecondsSinceEpoch(lastActiveRaw);
     return AdminPerformance(
       adminId: json['adminId'] as String? ?? '',
       adminName: json['adminName'] as String? ?? '',
       conversationsHandled: (json['conversationsHandled'] as num?)?.toInt() ?? 0,
       messagesSent: (json['messagesSent'] as num?)?.toInt() ?? 0,
       averageResponseTime: ms != null ? Duration(milliseconds: ms) : Duration.zero,
+      rank: (json['rank'] as num?)?.toInt(),
+      averageFirstResponseTime: firstMs != null ? Duration(milliseconds: firstMs) : null,
+      lastActive: lastActive,
+      conversationCompletionRate: (json['conversationCompletionRate'] as num?)?.toDouble(),
+      averageRating: (json['averageRating'] as num?)?.toDouble(),
     );
   }
 }

@@ -348,6 +348,13 @@ class AppLocalizations {
   String get last7Days => _localizedValues[locale.languageCode]?['last7Days'] ?? 'Last 7 days';
   String get last30Days => _localizedValues[locale.languageCode]?['last30Days'] ?? 'Last 30 days';
   String get thisMonth => _localizedValues[locale.languageCode]?['thisMonth'] ?? 'This month';
+  String get adminPerformance => _localizedValues[locale.languageCode]?['adminPerformance'] ?? 'Admin performance';
+  String get leaderboard => _localizedValues[locale.languageCode]?['leaderboard'] ?? 'Leaderboard';
+  String get topPerformer => _localizedValues[locale.languageCode]?['topPerformer'] ?? 'Top performer';
+  String get conversationsHandled => _localizedValues[locale.languageCode]?['conversationsHandled'] ?? 'Conversations handled';
+  String get messagesPerDay => _localizedValues[locale.languageCode]?['messagesPerDay'] ?? 'Messages/day';
+  String get rank => _localizedValues[locale.languageCode]?['rank'] ?? 'Rank';
+  String get messagesSent => _localizedValues[locale.languageCode]?['messagesSent'] ?? 'Messages sent';
 
   /// Resolve auth error message key to localized string.
   String authErrorMessage(String messageKey) {
@@ -561,6 +568,13 @@ class AppLocalizations {
       'last7Days': 'Last 7 days',
       'last30Days': 'Last 30 days',
       'thisMonth': 'This month',
+      'adminPerformance': 'Admin performance',
+      'leaderboard': 'Leaderboard',
+      'topPerformer': 'Top performer',
+      'conversationsHandled': 'Conversations handled',
+      'messagesPerDay': 'Messages/day',
+      'rank': 'Rank',
+      'messagesSent': 'Messages sent',
       'auth_error_email_required': 'Please enter your email.',
       'auth_error_password_required': 'Please enter your password.',
       'auth_error_code_required': 'Please enter your access code.',
@@ -779,6 +793,13 @@ class AppLocalizations {
       'last7Days': 'Letzte 7 Tage',
       'last30Days': 'Letzte 30 Tage',
       'thisMonth': 'Diesen Monat',
+      'adminPerformance': 'Admin-Leistung',
+      'leaderboard': 'Bestenliste',
+      'topPerformer': 'Top-Performer',
+      'conversationsHandled': 'Bearbeitete Gespräche',
+      'messagesPerDay': 'Nachrichten pro Tag',
+      'rank': 'Rang',
+      'messagesSent': 'Gesendete Nachrichten',
       'auth_error_email_required': 'Bitte E-Mail eingeben.',
       'auth_error_password_required': 'Bitte Passwort eingeben.',
       'auth_error_code_required': 'Bitte Zugangscode eingeben.',
