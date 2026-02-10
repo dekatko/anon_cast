@@ -318,6 +318,19 @@ class AppLocalizations {
   String get conversationKeysSectionTitle => _localizedValues[locale.languageCode]?['conversationKeysSectionTitle'] ?? 'Conversation keys (multi-device)';
   String get verifyEncryptionAndKeyStorage => _localizedValues[locale.languageCode]?['verifyEncryptionAndKeyStorage'] ?? 'Verify encryption and key storage';
 
+  // ——— Statistics / reporting ———
+  String get totalMessages => _localizedValues[locale.languageCode]?['totalMessages'] ?? 'Total messages';
+  String get activeConversations => _localizedValues[locale.languageCode]?['activeConversations'] ?? 'Active conversations';
+  String get unreadMessages => _localizedValues[locale.languageCode]?['unreadMessages'] ?? 'Unread';
+  String get averagePerDay => _localizedValues[locale.languageCode]?['averagePerDay'] ?? 'Ø per day';
+  String get messageHistory => _localizedValues[locale.languageCode]?['messageHistory'] ?? 'Message history';
+  String get noDataAvailable => _localizedValues[locale.languageCode]?['noDataAvailable'] ?? 'No data available';
+  String get averageFirstResponse => _localizedValues[locale.languageCode]?['averageFirstResponse'] ?? 'First response time';
+  String get averageResponseTime => _localizedValues[locale.languageCode]?['averageResponseTime'] ?? 'Average response time';
+  String get responseRate => _localizedValues[locale.languageCode]?['responseRate'] ?? 'Response rate';
+
+  String get responseTimes => _localizedValues[locale.languageCode]?['responseTimes'] ?? 'Response times';
+
   /// Resolve auth error message key to localized string.
   String authErrorMessage(String messageKey) {
     return _localizedValues[locale.languageCode]?[messageKey] ??
@@ -504,6 +517,16 @@ class AppLocalizations {
       'securityAuditSectionTitle': 'Security audit',
       'conversationKeysSectionTitle': 'Conversation keys (multi-device)',
       'verifyEncryptionAndKeyStorage': 'Verify encryption and key storage',
+      'totalMessages': 'Total messages',
+      'activeConversations': 'Active conversations',
+      'unreadMessages': 'Unread',
+      'averagePerDay': 'Ø per day',
+      'messageHistory': 'Message history',
+      'noDataAvailable': 'No data available',
+      'averageFirstResponse': 'First response time',
+      'averageResponseTime': 'Average response time',
+      'responseRate': 'Response rate',
+      'responseTimes': 'Response times',
       'auth_error_email_required': 'Please enter your email.',
       'auth_error_password_required': 'Please enter your password.',
       'auth_error_code_required': 'Please enter your access code.',
@@ -696,6 +719,16 @@ class AppLocalizations {
       'securityAuditSectionTitle': 'Sicherheitsprüfung',
       'conversationKeysSectionTitle': 'Konversationsschlüssel (Multi-Gerät)',
       'verifyEncryptionAndKeyStorage': 'Verschlüsselung und Schlüsselspeicherung prüfen',
+      'totalMessages': 'Gesamtnachrichten',
+      'activeConversations': 'Aktive Gespräche',
+      'unreadMessages': 'Ungelesen',
+      'averagePerDay': 'Ø pro Tag',
+      'messageHistory': 'Nachrichtenverlauf',
+      'noDataAvailable': 'Keine Daten verfügbar',
+      'averageFirstResponse': 'Erste Antwortzeit',
+      'averageResponseTime': 'Durchschnittliche Antwortzeit',
+      'responseRate': 'Antwortquote',
+      'responseTimes': 'Antwortzeiten',
       'auth_error_email_required': 'Bitte E-Mail eingeben.',
       'auth_error_password_required': 'Bitte Passwort eingeben.',
       'auth_error_code_required': 'Bitte Zugangscode eingeben.',
