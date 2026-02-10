@@ -339,6 +339,15 @@ class AppLocalizations {
   String lastUpdatedMinutesAgo(int minutes) =>
       (_localizedValues[locale.languageCode]?['lastUpdatedMinutesAgo'] ?? 'Last updated: %s min ago').replaceFirst('%s', '$minutes');
   String get forceRefresh => _localizedValues[locale.languageCode]?['forceRefresh'] ?? 'Force refresh';
+  String get vsLastWeek => _localizedValues[locale.languageCode]?['vsLastWeek'] ?? 'vs. last week';
+  String get vsLastMonth => _localizedValues[locale.languageCode]?['vsLastMonth'] ?? 'vs. last month';
+  String get vsPreviousPeriod => _localizedValues[locale.languageCode]?['vsPreviousPeriod'] ?? 'vs. previous period';
+  String get trendUp => _localizedValues[locale.languageCode]?['trendUp'] ?? 'Up';
+  String get trendDown => _localizedValues[locale.languageCode]?['trendDown'] ?? 'Down';
+  String get trendStable => _localizedValues[locale.languageCode]?['trendStable'] ?? 'Stable';
+  String get last7Days => _localizedValues[locale.languageCode]?['last7Days'] ?? 'Last 7 days';
+  String get last30Days => _localizedValues[locale.languageCode]?['last30Days'] ?? 'Last 30 days';
+  String get thisMonth => _localizedValues[locale.languageCode]?['thisMonth'] ?? 'This month';
 
   /// Resolve auth error message key to localized string.
   String authErrorMessage(String messageKey) {
@@ -543,6 +552,15 @@ class AppLocalizations {
       'lastUpdated': 'Last updated',
       'lastUpdatedMinutesAgo': 'Last updated: %s min ago',
       'forceRefresh': 'Force refresh',
+      'vsLastWeek': 'vs. last week',
+      'vsLastMonth': 'vs. last month',
+      'vsPreviousPeriod': 'vs. previous period',
+      'trendUp': 'Up',
+      'trendDown': 'Down',
+      'trendStable': 'Stable',
+      'last7Days': 'Last 7 days',
+      'last30Days': 'Last 30 days',
+      'thisMonth': 'This month',
       'auth_error_email_required': 'Please enter your email.',
       'auth_error_password_required': 'Please enter your password.',
       'auth_error_code_required': 'Please enter your access code.',
@@ -752,6 +770,15 @@ class AppLocalizations {
       'lastUpdated': 'Aktualisiert',
       'lastUpdatedMinutesAgo': 'Aktualisiert vor %s Min.',
       'forceRefresh': 'Aktualisieren',
+      'vsLastWeek': 'vs. letzte Woche',
+      'vsLastMonth': 'vs. letzten Monat',
+      'vsPreviousPeriod': 'vs. Vorperiode',
+      'trendUp': 'Anstieg',
+      'trendDown': 'Rückgang',
+      'trendStable': 'Stabil',
+      'last7Days': 'Letzte 7 Tage',
+      'last30Days': 'Letzte 30 Tage',
+      'thisMonth': 'Diesen Monat',
       'auth_error_email_required': 'Bitte E-Mail eingeben.',
       'auth_error_password_required': 'Bitte Passwort eingeben.',
       'auth_error_code_required': 'Bitte Zugangscode eingeben.',

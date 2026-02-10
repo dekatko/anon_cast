@@ -8,6 +8,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/access_code.dart';
 import '../../models/admin_message.dart';
+import '../../models/comparative_statistics.dart';
 import '../../models/message_statistics.dart';
 import '../../models/response_time_analytics.dart';
 import '../../models/security_report.dart';
@@ -58,8 +59,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   late final ReportingService _reportingService;
   Future<MessageStatistics>? _statisticsFuture;
   Future<ResponseTimeAnalytics>? _responseTimeFuture;
+  Future<ComparativeStatistics>? _comparativeFuture;
   DateTime _startDate = DateTime.now().subtract(const Duration(days: 7));
   DateTime _endDate = DateTime.now();
+  /// 'last7' | 'last30' | 'month' | null (custom).
+  String? _periodPreset = 'last7';
   bool _isLoadingStats = false;
   bool _isExportingPdf = false;
   DateTime? _lastStatsUpdated;
@@ -93,12 +97,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       endDate: _endDate,
       bypassCache: forceRefresh,
     );
+    final comparativeFuture = _reportingService.getComparativeStatistics(
+      organizationId: organizationId,
+      currentStart: _startDate,
+      currentEnd: _endDate,
+      bypassCache: forceRefresh,
+    );
     setState(() {
       _statisticsFuture = statsFuture;
       _responseTimeFuture = responseFuture;
+      _comparativeFuture = comparativeFuture;
     });
     try {
-      await Future.wait([statsFuture, responseFuture]);
+      await Future.wait([statsFuture, responseFuture, comparativeFuture]);
       if (mounted) setState(() => _lastStatsUpdated = DateTime.now());
     } catch (_) {
       // Futures already hold error; FutureBuilder will show it
@@ -106,6 +117,31 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       if (mounted) setState(() => _isLoadingStats = false);
     }
   }
+
+  void _applyPeriodPreset(int days) {
+    final now = DateTime.now();
+    setState(() {
+      _endDate = now;
+      _startDate = now.subtract(Duration(days: days));
+      _periodPreset = days == 7 ? 'last7' : 'last30';
+    });
+    _loadStatistics();
+  }
+
+  void _applyThisMonth() {
+    final now = DateTime.now();
+    setState(() {
+      _startDate = DateTime(now.year, now.month, 1);
+      _endDate = now;
+      _periodPreset = 'month';
+    });
+    _loadStatistics();
+  }
+
+  bool _isPeriodPreset(int days) =>
+      _periodPreset == (days == 7 ? 'last7' : 'last30');
+
+  bool _isThisMonthSelected() => _periodPreset == 'month';
 
   Future<void> _pickDateRange(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
@@ -120,6 +156,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       setState(() {
         _startDate = picked.start;
         _endDate = picked.end;
+        _periodPreset = null;
       });
       await _loadStatistics();
     }
@@ -231,6 +268,29 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     },
                   ),
                   const SizedBox(height: 24),
+                  // Period presets
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      FilterChip(
+                        label: Text(l10n.last7Days),
+                        selected: _isPeriodPreset(7),
+                        onSelected: (_) => _applyPeriodPreset(7),
+                      ),
+                      FilterChip(
+                        label: Text(l10n.last30Days),
+                        selected: _isPeriodPreset(30),
+                        onSelected: (_) => _applyPeriodPreset(30),
+                      ),
+                      FilterChip(
+                        label: Text(l10n.thisMonth),
+                        selected: _isThisMonthSelected(),
+                        onSelected: (_) => _applyThisMonth(),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
                   // Date range selector and force refresh
                   Row(
                     children: [
@@ -298,14 +358,20 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   Widget _buildStatisticsSection(
       BuildContext context, AppLocalizations l10n) {
-    if (_statisticsFuture == null || _responseTimeFuture == null) {
+    if (_statisticsFuture == null ||
+        _responseTimeFuture == null ||
+        _comparativeFuture == null) {
       return const SizedBox(
         height: 120,
         child: Center(child: CircularProgressIndicator()),
       );
     }
     return FutureBuilder<List<dynamic>>(
-      future: Future.wait([_statisticsFuture!, _responseTimeFuture!]),
+      future: Future.wait([
+        _statisticsFuture!,
+        _responseTimeFuture!,
+        _comparativeFuture!,
+      ]),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting &&
             !snapshot.hasData) {
@@ -345,10 +411,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         final data = snapshot.data!;
         final stats = data[0] as MessageStatistics;
         final responseAnalytics = data[1] as ResponseTimeAnalytics;
+        final comparative = data[2] as ComparativeStatistics;
+        final days = _endDate.difference(_startDate).inDays;
+        final comparisonLabel = days <= 10
+            ? l10n.vsLastWeek
+            : (days <= 35 ? l10n.vsLastMonth : l10n.vsPreviousPeriod);
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            StatisticsCards(statistics: stats),
+            StatisticsCards(
+              statistics: stats,
+              comparative: comparative,
+              comparisonLabel: comparisonLabel,
+            ),
             const SizedBox(height: 20),
             MessageTrendChart(dailyData: stats.dailyTrend),
             const SizedBox(height: 20),

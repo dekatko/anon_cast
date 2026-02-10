@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
 
+import '../models/comparative_statistics.dart';
 import '../models/message_statistics.dart';
 import '../models/response_time_analytics.dart';
 import 'report_cache_service.dart';
@@ -370,6 +371,62 @@ class ReportingService {
     if (v is int) return DateTime.fromMillisecondsSinceEpoch(v);
     if (v is String) return DateTime.tryParse(v) ?? DateTime.now();
     return DateTime.now();
+  }
+
+  /// Comparative stats: current period vs previous period (same duration).
+  /// Fetches both periods; uses cache when available.
+  Future<ComparativeStatistics> getComparativeStatistics({
+    required String organizationId,
+    required DateTime currentStart,
+    required DateTime currentEnd,
+    bool bypassCache = false,
+  }) async {
+    final duration = currentEnd.difference(currentStart);
+    final previousEnd = currentStart;
+    final previousStart = currentStart.subtract(duration);
+
+    final currentStatsFuture = getMessageStatistics(
+      organizationId: organizationId,
+      startDate: currentStart,
+      endDate: currentEnd,
+      bypassCache: bypassCache,
+    );
+    final previousStatsFuture = getMessageStatistics(
+      organizationId: organizationId,
+      startDate: previousStart,
+      endDate: previousEnd,
+      bypassCache: bypassCache,
+    );
+    final currentResponseFuture = getResponseTimeAnalytics(
+      organizationId: organizationId,
+      startDate: currentStart,
+      endDate: currentEnd,
+      bypassCache: bypassCache,
+    );
+    final previousResponseFuture = getResponseTimeAnalytics(
+      organizationId: organizationId,
+      startDate: previousStart,
+      endDate: previousEnd,
+      bypassCache: bypassCache,
+    );
+
+    final results = await Future.wait([
+      currentStatsFuture,
+      previousStatsFuture,
+      currentResponseFuture,
+      previousResponseFuture,
+    ]);
+    final currentStats = results[0] as MessageStatistics;
+    final previousStats = results[1] as MessageStatistics;
+    final currentResponseTime = results[2] as ResponseTimeAnalytics;
+    final previousResponseTime = results[3] as ResponseTimeAnalytics;
+
+    return ComparativeStatistics(
+      currentStats: currentStats,
+      previousStats: previousStats,
+      currentResponseTime: currentResponseTime,
+      previousResponseTime: previousResponseTime,
+    );
   }
 
   /// Clears in-memory caches (e.g. after org switch or for testing).

@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../models/comparative_statistics.dart';
 import '../models/message_statistics.dart';
+import 'trend_indicator.dart';
 
-/// Single statistic card with icon, value, and German label.
+/// Single statistic card with icon, value, optional trend.
 class _StatCard extends StatelessWidget {
   const _StatCard({
     required this.title,
     required this.value,
     required this.icon,
     required this.color,
+    this.trendWidget,
   });
 
   final String title;
   final String value;
   final IconData icon;
   final Color color;
+  final Widget? trendWidget;
 
   @override
   Widget build(BuildContext context) {
@@ -62,6 +66,7 @@ class _StatCard extends StatelessWidget {
                   ),
                 ),
               ),
+              if (trendWidget != null) trendWidget!,
             ],
           ),
         ),
@@ -71,13 +76,18 @@ class _StatCard extends StatelessWidget {
 }
 
 /// Four statistics cards: total messages, active conversations, unread, average per day.
+/// Optionally shows trend vs. previous period when [comparative] and [comparisonLabel] are set.
 class StatisticsCards extends StatelessWidget {
   const StatisticsCards({
     super.key,
     required this.statistics,
+    this.comparative,
+    this.comparisonLabel,
   });
 
   final MessageStatistics statistics;
+  final ComparativeStatistics? comparative;
+  final String? comparisonLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -89,6 +99,9 @@ class StatisticsCards extends StatelessWidget {
     final orange = Colors.orange.shade700;
     final purple = Colors.deepPurple.shade600;
 
+    final hasComparison = comparative != null && comparative!.hasPreviousPeriod;
+    final label = comparisonLabel;
+
     return Wrap(
       spacing: 12,
       runSpacing: 12,
@@ -98,24 +111,56 @@ class StatisticsCards extends StatelessWidget {
           value: '${statistics.totalMessageCount}',
           icon: Icons.message,
           color: blue,
+          trendWidget: hasComparison
+              ? TrendIndicator(
+                  changePercent: comparative!.messageCountChangePercent,
+                  trend: comparative!.messageCountTrend,
+                  positiveIsGood: true,
+                  comparedToLabel: label,
+                )
+              : null,
         ),
         _StatCard(
           title: l10n.activeConversations,
           value: '${statistics.activeConversationCount}',
           icon: Icons.chat_bubble_outline,
           color: green,
+          trendWidget: hasComparison
+              ? TrendIndicator(
+                  changePercent: comparative!.activeConversationChangePercent,
+                  trend: comparative!.activeConversationTrend,
+                  positiveIsGood: true,
+                  comparedToLabel: label,
+                )
+              : null,
         ),
         _StatCard(
           title: l10n.unreadMessages,
           value: '${statistics.unreadMessageCount}',
           icon: Icons.mark_email_unread,
           color: orange,
+          trendWidget: hasComparison
+              ? TrendIndicator(
+                  changePercent: comparative!.unreadChangePercent,
+                  trend: comparative!.unreadTrend,
+                  positiveIsGood: false,
+                  comparedToLabel: label,
+                )
+              : null,
         ),
         _StatCard(
           title: l10n.averagePerDay,
           value: statistics.averageMessagesPerDay.toStringAsFixed(1),
           icon: Icons.trending_up,
           color: purple,
+          trendWidget: hasComparison
+              ? TrendIndicator(
+                  changePercent: comparative!.averagePerDayChangePercent,
+                  trend: comparative!.averagePerDayTrend,
+                  positiveIsGood: true,
+                  comparedToLabel: label,
+                )
+              : null,
         ),
       ],
     );
